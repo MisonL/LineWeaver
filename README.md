@@ -12,7 +12,7 @@
 [![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://hub.docker.com/)
 [![Nginx](https://img.shields.io/badge/nginx-optimized-green.svg)](https://nginx.org/)
 
-[**🚀 在线体验**](https://misonl.github.io/LineWeaver) | [📚 文档](#-使用指南) 
+[**🚀 在线体验**](https://misonl.github.io/LineWeaver/) | [📚 文档](#-使用指南) 
 
 ---
 
