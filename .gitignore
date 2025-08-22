@@ -1,0 +1,65 @@
+# 操作系统生成的文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE和编辑器文件
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Qoder IDE 相关文件
+.qoder/
+
+# 日志文件
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 临时文件
+tmp/
+temp/
+*.tmp
+*.temp
+
+# 备份文件
+*.bak
+*.backup
+*.old
+
+# 压缩文件
+*.zip
+*.tar.gz
+*.rar
+
+# 依赖目录（如果项目后续添加）
+node_modules/
+bower_components/
+
+# 缓存目录
+.cache/
+.npm/
+.yarn/
+
+# 环境变量文件
+.env
+.env.local
+.env.development
+.env.production
+
+# Docker 相关（保留配置文件但排除运行时文件）
+.docker-data/
+docker-data/
+
+# 其他
+*.psd
+*.ai
+*.sketch

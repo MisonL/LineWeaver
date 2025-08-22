@@ -1,0 +1,95 @@
+# Docker 构建上下文忽略文件
+# 优化构建速度和镜像大小
+
+# Git 相关
+.git
+.gitignore
+.gitattributes
+
+# Docker 相关
+Dockerfile
+docker-compose.yml
+docker-compose.*.yml
+.dockerignore
+
+# IDE 和编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 系统文件
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp
+
+# 日志文件
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 依赖目录（如果有）
+node_modules/
+bower_components/
+
+# 缓存目录
+.cache/
+.npm/
+.yarn/
+
+# 临时文件
+tmp/
+temp/
+
+# 备份文件
+*.bak
+*.backup
+*.old
+
+# 压缩文件
+*.zip
+*.tar.gz
+*.rar
+
+# 文档和说明（保留 README.md）
+*.md
+!README.md
+
+# 测试相关（保留 test.html）
+test/
+tests/
+*.test.js
+*.spec.js
+!test.html
+
+# 配置文件（根据需要调整）
+.env
+.env.local
+.env.development
+.env.production
+
+# CI/CD 相关
+.github/
+.gitlab-ci.yml
+.travis.yml
+Jenkinsfile
+
+# 其他工具配置
+.eslintrc*
+.prettierrc*
+.stylelintrc*
+.editorconfig
+
+# 项目特定的忽略文件
+*.psd
+*.ai
+*.sketch
+
+# 开发相关脚本
+scripts/build.sh
+scripts/deploy.sh
+scripts/dev.sh

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文本换行符去除工具</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/responsive.css">
+</head>
+<body>
+    <main class="container">
+        <header class="header">
+            <h1 class="title">文本换行符去除工具</h1>
+            <p class="description">粘贴多行文本，点击转换去除所有换行符，生成连续文本并支持一键复制</p>
+        </header>
+
+        <section class="input-section">
+            <h2 class="section-title">输入文本</h2>
+            <textarea 
+                id="inputText" 
+                class="input-textarea" 
+                placeholder="请在此粘贴需要处理的多行文本..."
+                rows="6"
+            ></textarea>
+            <button id="convertBtn" class="convert-btn">
+                <span class="btn-text">转换文本</span>
+                <span class="btn-loading" style="display: none;">处理中...</span>
+            </button>
+        </section>
+
+        <section class="output-section">
+            <h2 class="section-title">输出结果</h2>
+            <textarea 
+                id="outputText" 
+                class="output-textarea" 
+                placeholder="转换后的文本将显示在这里..."
+                rows="6"
+                readonly
+            ></textarea>
+            <button id="copyBtn" class="copy-btn" disabled>
+                <span class="btn-text">复制到剪贴板</span>
+                <span class="btn-success" style="display: none;">复制成功!</span>
+            </button>
+        </section>
+
+        <!-- Toast 消息提示 -->
+        <div id="toast" class="toast">
+            <span class="toast-message"></span>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 文本换行符去除工具 - 简单实用的文本处理工具</p>
+    </footer>
+
+    <script src="scripts/utils.js"></script>
+    <script src="scripts/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文本处理功能测试</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .test-case { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
+        .pass { color: green; }
+        .fail { color: red; }
+        pre { background: #f5f5f5; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>文本换行符去除工具 - 功能测试</h1>
+    <div id="test-results"></div>
+
+    <script>
+        // 引入工具函数
+        function removeLineBreaks(text) {
+            if (!text || typeof text !== 'string') {
+                return '';
+            }
+            return text
+                .replace(/[\r\n]+/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        // 测试用例
+        const testCases = [
+            {
+                name: '普通换行文本',
+                input: '第一行\n第二行\n第三行',
+                expected: '第一行 第二行 第三行'
+            },
+            {
+                name: '混合换行符',
+                input: '行1\r\n行2\n行3\r行4',
+                expected: '行1 行2 行3 行4'
+            },
+            {
+                name: '多余空格和换行',
+                input: '文本1\n\n\n文本2',
+                expected: '文本1 文本2'
+            },
+            {
+                name: '空输入',
+                input: '',
+                expected: ''
+            },
+            {
+                name: '纯空格换行',
+                input: '\n   \n   \n',
+                expected: ''
+            },
+            {
+                name: '复杂混合场景',
+                input: '  开始\r\n\r\n中间内容\n   \n结束  ',
+                expected: '开始 中间内容 结束'
+            },
+            {
+                name: '单个换行符',
+                input: 'Hello\nWorld',
+                expected: 'Hello World'
+            },
+            {
+                name: 'Tab和空格混合',
+                input: '行1\t\n\t行2\n  行3  ',
+                expected: '行1 行2 行3'
+            },
+            {
+                name: '中文文本',
+                input: '你好\n世界\r\n这是测试',
+                expected: '你好 世界 这是测试'
+            },
+            {
+                name: '只有空白字符',
+                input: '   \t  \n  \r\n  ',
+                expected: ''
+            }
+        ];
+
+        // 运行测试
+        function runTests() {
+            const resultsDiv = document.getElementById('test-results');
+            let passCount = 0;
+            let totalCount = testCases.length;
+
+            testCases.forEach((testCase, index) => {
+                const result = removeLineBreaks(testCase.input);
+                const passed = result === testCase.expected;
+                
+                if (passed) passCount++;
+
+                const testDiv = document.createElement('div');
+                testDiv.className = 'test-case';
+                testDiv.innerHTML = `
+                    <h3>${testCase.name} ${passed ? '<span class="pass">✓ PASS</span>' : '<span class="fail">✗ FAIL</span>'}</h3>
+                    <p><strong>输入:</strong></p>
+                    <pre>${JSON.stringify(testCase.input)}</pre>
+                    <p><strong>期望输出:</strong></p>
+                    <pre>${JSON.stringify(testCase.expected)}</pre>
+                    <p><strong>实际输出:</strong></p>
+                    <pre>${JSON.stringify(result)}</pre>
+                    ${!passed ? `<p class="fail"><strong>测试失败！</strong></p>` : ''}
+                `;
+                
+                resultsDiv.appendChild(testDiv);
+            });
+
+            // 显示总结
+            const summaryDiv = document.createElement('div');
+            summaryDiv.innerHTML = `
+                <h2>测试总结</h2>
+                <p>通过: ${passCount}/${totalCount} (${Math.round(passCount/totalCount*100)}%)</p>
+                ${passCount === totalCount ? '<p class="pass">所有测试通过！</p>' : '<p class="fail">部分测试失败，需要修复。</p>'}
+            `;
+            resultsDiv.appendChild(summaryDiv);
+        }
+
+        // 页面加载后运行测试
+        window.addEventListener('load', runTests);
+    </script>
+</body>
+</html>
