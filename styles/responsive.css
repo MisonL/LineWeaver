@@ -1,354 +1,275 @@
-/* 响应式设计 - 基于设计文档的屏幕尺寸分类 */
+/* 响应式设计 - 左右分屏布局适配 */
 
-/* 平板端适配 (481px - 768px) */
-@media (max-width: 768px) {
-    .container {
-        max-width: 100%;
-        padding: calc(var(--spacing) * 2);
+/* 大屏幕优化 (>1200px) */
+@media (min-width: 1201px) {
+    .app-main {
+        max-width: 1400px;
+        margin: 0 auto;
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-xl);
     }
-
-    .title {
-        font-size: 2rem;
-    }
-
-    .description {
-        font-size: 1rem;
-        padding: 0 calc(var(--spacing) * 2);
-    }
-
-    .input-section,
-    .output-section {
-        padding: calc(var(--spacing) * 2);
-        margin-bottom: calc(var(--spacing) * 2);
-    }
-
-    .section-title {
-        font-size: 1.125rem;
-    }
-
+    
     .input-textarea,
     .output-textarea {
-        min-height: 100px;
-        font-size: 1rem;
+        font-size: 1.05rem;
     }
-
+    
+    .panel-title {
+        font-size: 1.25rem;
+    }
+    
     .convert-btn,
     .copy-btn {
-        padding: calc(var(--spacing) * 1.5) calc(var(--spacing) * 2);
-        font-size: 0.95rem;
+        padding: calc(var(--spacing) * 2.5) calc(var(--spacing) * 4);
+        font-size: 1rem;
+    }
+}
+
+/* 平板端适配 (769px - 1024px) */
+@media (max-width: 1024px) {
+    .app-header {
+        padding: calc(var(--spacing) * 2.5) calc(var(--spacing) * 3);
     }
     
-    /* 按钮组平板适配 */
-    .button-group {
-        gap: calc(var(--spacing) * 1);
+    .app-title {
+        font-size: 1.75rem;
     }
     
-    .example-btn {
-        padding: calc(var(--spacing) * 1.5) calc(var(--spacing) * 2);
+    .app-subtitle {
         font-size: 0.9rem;
     }
-
-    /* 模式选择器平板适配 */
+    
     .mode-options {
-        gap: calc(var(--spacing) * 1);
+        gap: calc(var(--spacing) * 1.25);
+        padding: calc(var(--spacing) * 0.75);
     }
     
     .mode-option {
-        padding: calc(var(--spacing) * 1);
-        gap: calc(var(--spacing) * 1);
+        padding: calc(var(--spacing) * 1.25) calc(var(--spacing) * 1.75);
+        font-size: 0.85rem;
     }
     
-    .mode-label {
-        font-size: 0.9rem;
+    .input-textarea,
+    .output-textarea {
+        font-size: 0.95rem;
+        margin: calc(var(--spacing) * 2.5);
+        padding: calc(var(--spacing) * 2.5);
     }
     
-    .mode-desc {
-        font-size: 0.8rem;
+    .text-stats {
+        gap: calc(var(--spacing) * 1.25);
+        font-size: 0.75rem;
+        padding: calc(var(--spacing) * 1.25);
+    }
+}
+
+/* 小屏平板和大手机 (481px - 768px) */
+@media (max-width: 768px) {
+    /* 切换为垂直布局 */
+    .app-main {
+        flex-direction: column;
+        gap: calc(var(--spacing) * 2);
+        padding: calc(var(--spacing) * 2);
+    }
+    
+    .app-title {
+        font-size: 1.5rem;
+    }
+    
+    .app-subtitle {
+        font-size: 0.8125rem;
+        display: none; /* 隐藏副标题节省空间 */
+    }
+    
+    .panel-header {
+        padding: calc(var(--spacing) * 3) calc(var(--spacing) * 3) calc(var(--spacing) * 2.5);
+    }
+    
+    .panel-title {
+        font-size: 1rem;
+    }
+    
+    .mode-selector {
+        padding: calc(var(--spacing) * 2.5) calc(var(--spacing) * 3);
+    }
+    
+    .mode-options {
+        flex-direction: column;
+        gap: calc(var(--spacing) * 0.5);
+        padding: calc(var(--spacing) * 0.5);
+    }
+    
+    .mode-option {
+        padding: calc(var(--spacing) * 1.25);
+        justify-content: center;
+    }
+    
+    .custom-config {
+        padding: calc(var(--spacing) * 2.5) calc(var(--spacing) * 3);
     }
     
     .config-row {
         flex-direction: column;
-        align-items: flex-start;
-        gap: calc(var(--spacing) * 1);
+        gap: calc(var(--spacing) * 1.5);
     }
     
-    .config-row label {
-        min-width: auto;
-        font-size: 0.9rem;
+    .input-textarea,
+    .output-textarea {
+        margin: calc(var(--spacing) * 3);
+        padding: calc(var(--spacing) * 3);
+        font-size: 0.9375rem;
     }
     
-    .config-row input[type="text"] {
-        width: 100%;
+    .convert-btn,
+    .copy-btn,
+    .example-btn {
+        margin: 0 calc(var(--spacing) * 3) calc(var(--spacing) * 3);
+        padding: calc(var(--spacing) * 2);
+        font-size: 0.875rem;
     }
     
-    /* 文本统计平板适配 */
     .text-stats {
-        gap: calc(var(--spacing) * 1);
-        font-size: 0.8rem;
+        flex-wrap: wrap;
+        gap: calc(var(--spacing) * 1.5);
     }
-
-    /* 优化 Toast 位置 */
-    .toast {
-        top: calc(var(--spacing) * 2);
-        right: calc(var(--spacing) * 2);
-        left: calc(var(--spacing) * 2);
-        max-width: none;
+    
+    .app-footer {
+        padding: calc(var(--spacing) * 1.5);
+        font-size: 0.75rem;
     }
 }
 
-/* 移动端适配 (<481px) */
+/* 手机端 (≤480px) */
 @media (max-width: 480px) {
-    .container {
-        padding: calc(var(--spacing) * 1.5);
-    }
-
-    .header {
-        margin-bottom: calc(var(--spacing) * 2);
-    }
-
-    .title {
-        font-size: 1.75rem;
-        margin-bottom: calc(var(--spacing) * 0.5);
-    }
-
-    .description {
-        font-size: 0.9rem;
-        padding: 0;
-    }
-
-    .input-section,
-    .output-section {
-        padding: calc(var(--spacing) * 1.5);
-        margin-bottom: calc(var(--spacing) * 1.5);
-        border-radius: calc(var(--radius) * 0.75);
-    }
-
-    .section-title {
-        font-size: 1rem;
-        margin-bottom: calc(var(--spacing) * 1.5);
-    }
-
-    .input-textarea,
-    .output-textarea {
-        padding: calc(var(--spacing) * 1.5);
-        min-height: 80px;
+    body {
         font-size: 0.95rem;
-        border-radius: calc(var(--radius) * 0.75);
     }
-
-    .convert-btn,
-    .copy-btn {
+    
+    .app-header {
         padding: calc(var(--spacing) * 1.5);
-        margin-top: calc(var(--spacing) * 1.5);
-        font-size: 0.9rem;
-        border-radius: calc(var(--radius) * 0.75);
     }
-
-    /* 模式选择器移动端优化 */
+    
+    .app-title {
+        font-size: 1.5rem;
+    }
+    
+    .panel-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: calc(var(--spacing) * 1.5);
+        padding: calc(var(--spacing) * 1.5);
+    }
+    
+    .panel-title {
+        font-size: 1rem;
+    }
+    
+    .example-btn {
+        align-self: flex-end;
+        font-size: 0.75rem;
+        padding: calc(var(--spacing) * 1) calc(var(--spacing) * 1.5);
+    }
+    
     .mode-selector {
         padding: calc(var(--spacing) * 1.5);
     }
     
-    .mode-title {
-        font-size: 0.95rem;
-        margin-bottom: calc(var(--spacing) * 1.5);
-    }
-    
-    .mode-label {
+    .mode-option {
+        padding: calc(var(--spacing) * 1.25);
         font-size: 0.85rem;
-    }
-    
-    .mode-desc {
-        font-size: 0.75rem;
-        line-height: 1.3;
     }
     
     .custom-config {
         padding: calc(var(--spacing) * 1.5);
     }
     
-    /* 文本统计移动端优化 */
+    .input-textarea,
+    .output-textarea {
+        margin: calc(var(--spacing) * 1.5);
+        padding: calc(var(--spacing) * 1.5);
+        font-size: 0.9rem;
+    }
+    
+    .convert-btn,
+    .copy-btn {
+        margin: 0 calc(var(--spacing) * 1.5) calc(var(--spacing) * 1.5);
+        padding: calc(var(--spacing) * 1.75);
+        font-size: 0.85rem;
+        min-height: 44px; /* iOS推荐的最小触控目标 */
+    }
+    
     .text-stats {
-        flex-wrap: wrap;
+        font-size: 0.7rem;
         gap: calc(var(--spacing) * 0.75);
-        font-size: 0.75rem;
         padding: calc(var(--spacing) * 1);
     }
     
-    .stats-divider {
-        display: none; /* 移动端隐藏分隔符 */
-    }
-
-    /* 按钮组移动端优化 */
-    .button-group {
-        flex-direction: column;
-        gap: calc(var(--spacing) * 1);
-    }
-    
-    .convert-btn {
-        flex: none;
-    }
-    
-    .example-btn {
-        font-size: 0.85rem;
-        padding: calc(var(--spacing) * 1.25) calc(var(--spacing) * 1.5);
-    }
-    
-    /* 优化触控体验 */
-    .convert-btn,
-    .copy-btn {
-        min-height: 48px; /* 符合移动端最小触控目标 */
-    }
-
     /* Toast 移动端优化 */
     .toast {
         top: auto;
-        bottom: calc(var(--spacing) * 2);
+        bottom: calc(var(--spacing) * 3);
         right: calc(var(--spacing) * 1.5);
         left: calc(var(--spacing) * 1.5);
+        max-width: none;
         text-align: center;
-    }
-
-    .footer {
-        padding: calc(var(--spacing) * 2);
-        font-size: 0.8rem;
-    }
-
-    /* 移动端禁用 hover 效果以避免粘性 */
-    .input-section:hover,
-    .output-section:hover {
-        transform: none;
-        box-shadow: var(--shadow);
-    }
-
-    .convert-btn:hover:not(:disabled),
-    .copy-btn:hover:not(:disabled) {
-        transform: none;
+        border-radius: var(--radius);
     }
 }
 
-/* 超小屏幕适配 (<360px) */
-@media (max-width: 359px) {
-    .container {
-        padding: var(--spacing);
+/* 超小屏幕 (≤360px) */
+@media (max-width: 360px) {
+    .app-title {
+        font-size: 1.2rem;
     }
-
-    .title {
-        font-size: 1.5rem;
-    }
-
-    .description {
-        font-size: 0.85rem;
-        line-height: 1.4;
-    }
-
-    .input-section,
-    .output-section {
-        padding: var(--spacing);
-    }
-
-    .input-textarea,
-    .output-textarea {
-        padding: var(--spacing);
+    
+    .panel-title {
         font-size: 0.9rem;
     }
-
+    
+    .mode-option {
+        font-size: 0.75rem;
+    }
+    
+    .input-textarea,
+    .output-textarea {
+        font-size: 0.8rem;
+    }
+    
     .convert-btn,
     .copy-btn {
-        font-size: 0.85rem;
-        padding: var(--spacing);
+        font-size: 0.75rem;
     }
 }
 
 /* 横屏模式优化 */
-@media (max-height: 500px) and (orientation: landscape) {
-    .container {
-        padding: calc(var(--spacing) * 1.5);
+@media (max-height: 600px) and (orientation: landscape) {
+    .app-header {
+        padding: calc(var(--spacing) * 1) calc(var(--spacing) * 2);
     }
-
-    .header {
-        margin-bottom: calc(var(--spacing) * 1.5);
+    
+    .app-title {
+        font-size: 1.3rem;
     }
-
-    .title {
-        font-size: 1.75rem;
-    }
-
-    .input-textarea,
-    .output-textarea {
-        min-height: 60px;
-    }
-
-    .footer {
-        padding: calc(var(--spacing) * 1.5);
-    }
-}
-
-/* 大屏幕优化 (>1200px) */
-@media (min-width: 1201px) {
-    .container {
-        max-width: 900px;
-        padding: calc(var(--spacing) * 4);
-    }
-
-    .title {
-        font-size: 3rem;
-    }
-
-    .description {
-        font-size: 1.2rem;
-    }
-
-    .input-textarea,
-    .output-textarea {
-        min-height: 150px;
-        font-size: 1.05rem;
-    }
-
-    .convert-btn,
-    .copy-btn {
-        font-size: 1.05rem;
-        padding: calc(var(--spacing) * 2.5) calc(var(--spacing) * 3);
-    }
-}
-
-/* 高分辨率屏幕优化 */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-    .input-section,
-    .output-section {
-        border-width: 0.5px;
-    }
-
-    .input-textarea,
-    .output-textarea {
-        border-width: 1px;
-    }
-}
-
-/* 打印样式 */
-@media print {
-    .container {
-        max-width: 100%;
-        padding: 0;
-        box-shadow: none;
-    }
-
-    .convert-btn,
-    .copy-btn,
-    .toast,
-    .footer {
+    
+    .app-subtitle {
         display: none;
     }
-
-    .input-section,
-    .output-section {
-        box-shadow: none;
-        border: 1px solid #000;
-        break-inside: avoid;
+    
+    .panel-header {
+        padding: calc(var(--spacing) * 1);
     }
-
-    .title {
-        color: #000;
+    
+    .mode-selector {
+        padding: calc(var(--spacing) * 1);
+    }
+    
+    .custom-config {
+        padding: calc(var(--spacing) * 1);
+    }
+    
+    .app-footer {
+        display: none; /* 横屏时隐藏页脚 */
     }
 }
 
@@ -361,14 +282,10 @@
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
     }
-
-    .input-section:hover,
-    .output-section:hover {
-        transform: none;
-    }
-
+    
     .convert-btn:hover:not(:disabled),
-    .copy-btn:hover:not(:disabled) {
+    .copy-btn:hover:not(:disabled),
+    .example-btn:hover {
         transform: none;
     }
 }
@@ -379,14 +296,45 @@
         --border-color: #000;
         --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     }
-
+    
     .input-textarea,
     .output-textarea {
         border-width: 2px;
     }
-
+    
     .convert-btn,
     .copy-btn {
         border: 2px solid var(--white);
+    }
+}
+
+/* 打印样式 */
+@media print {
+    .app-header,
+    .app-footer,
+    .mode-selector,
+    .custom-config,
+    .convert-btn,
+    .copy-btn,
+    .example-btn,
+    .toast {
+        display: none;
+    }
+    
+    .app-main {
+        flex-direction: column;
+        height: auto;
+    }
+    
+    .input-panel,
+    .output-panel {
+        border: 1px solid #000;
+        margin-bottom: 1rem;
+    }
+    
+    .input-textarea,
+    .output-textarea {
+        border: 1px solid #000;
+        background: white;
     }
 }

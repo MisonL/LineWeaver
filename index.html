@@ -8,33 +8,37 @@
     <link rel="stylesheet" href="styles/responsive.css">
 </head>
 <body>
-    <main class="container">
-        <header class="header">
-            <h1 class="title">LineWeaver</h1>
-            <p class="description">粘贴多行文本，点击转换去除所有换行符，生成连续文本并支持一键复制</p>
-        </header>
+    <!-- 顶部标题栏 -->
+    <header class="app-header">
+        <h1 class="app-title">LineWeaver</h1>
+        <p class="app-subtitle">粘贴多行文本，点击转换去除所有换行符，生成连续文本并支持一键复制</p>
+    </header>
 
-        <section class="input-section">
-            <h2 class="section-title">输入文本</h2>
+    <!-- 主工作区 -->
+    <main class="app-main">
+        <!-- 左侧输入区 -->
+        <section class="input-panel">
+            <div class="panel-header">
+                <h2 class="panel-title">📝 输入文本</h2>
+                <button id="exampleBtn" class="example-btn" type="button">
+                    💡 加载示例
+                </button>
+            </div>
             
             <!-- 处理模式选择 -->
             <div class="mode-selector">
-                <label class="mode-title">📋 处理模式：</label>
                 <div class="mode-options">
                     <label class="mode-option">
                         <input type="radio" name="processMode" value="simple" checked>
-                        <span class="mode-label">🔄 简单模式</span>
-                        <small class="mode-desc">直接去除换行符，用空格连接</small>
+                        <span class="mode-label">🔄 简单</span>
                     </label>
                     <label class="mode-option">
                         <input type="radio" name="processMode" value="smart">
-                        <span class="mode-label">🧠 智能模式</span>
-                        <small class="mode-desc">保留结构标识，适合AI对话</small>
+                        <span class="mode-label">🧠 智能</span>
                     </label>
                     <label class="mode-option">
                         <input type="radio" name="processMode" value="custom">
-                        <span class="mode-label">🎨 自定义模式</span>
-                        <small class="mode-desc">自定义分隔符，灵活配置</small>
+                        <span class="mode-label">🎨 自定义</span>
                     </label>
                 </div>
             </div>
@@ -42,12 +46,8 @@
             <!-- 自定义模式配置 -->
             <div class="custom-config" id="customConfig" style="display: none;">
                 <div class="config-row">
-                    <label>段落分隔符：</label>
-                    <input type="text" id="paragraphSeparator" value="[PARA]" placeholder="输入段落分隔符">
-                </div>
-                <div class="config-row">
-                    <label>列表分隔符：</label>
-                    <input type="text" id="listSeparator" value="[LIST]" placeholder="输入列表分隔符">
+                    <input type="text" id="paragraphSeparator" value="[PARA]" placeholder="段落分隔符">
+                    <input type="text" id="listSeparator" value="[LIST]" placeholder="列表标识">
                 </div>
             </div>
             
@@ -55,51 +55,46 @@
                 id="inputText" 
                 class="input-textarea" 
                 placeholder="请在此粘贴需要处理的多行文本..."
-                rows="6"
             ></textarea>
             
-            <div class="button-group">
-                <button id="convertBtn" class="convert-btn">
-                    <span class="btn-text">转换文本</span>
-                    <span class="btn-loading" style="display: none;">处理中...</span>
-                </button>
-                <button id="exampleBtn" class="example-btn" type="button">
-                    💡 加载示例
-                </button>
-            </div>
+            <button id="convertBtn" class="convert-btn">
+                <span class="btn-text">转换文本</span>
+                <span class="btn-loading" style="display: none;">处理中...</span>
+            </button>
         </section>
 
-        <section class="output-section">
-            <h2 class="section-title">输出结果</h2>
+        <!-- 右侧输出区 -->
+        <section class="output-panel">
+            <div class="panel-header">
+                <h2 class="panel-title">✨ 输出结果</h2>
+                <div class="text-stats" id="textStats" style="display: none;">
+                    <span class="stats-item">🔢 <span id="charCount">0</span></span>
+                    <span class="stats-item">🗺️ <span id="wordCount">0</span></span>
+                    <span class="stats-item">✨ -<span id="savedChars">0</span></span>
+                </div>
+            </div>
+            
             <textarea 
                 id="outputText" 
                 class="output-textarea" 
                 placeholder="转换后的文本将显示在这里..."
-                rows="6"
                 readonly
             ></textarea>
-            
-            <!-- 简单的文本统计 -->
-            <div class="text-stats" id="textStats" style="display: none;">
-                <span class="stats-item">🔢 <span id="charCount">0</span> 字符</span>
-                <span class="stats-item">🗺️ <span id="wordCount">0</span> 词语</span>
-                <span class="stats-divider">|</span>
-                <span class="stats-item">✨ 已缩减 <span id="savedChars">0</span> 字符</span>
-            </div>
             
             <button id="copyBtn" class="copy-btn" disabled>
                 <span class="btn-text">复制到剪贴板</span>
                 <span class="btn-success" style="display: none;">复制成功!</span>
             </button>
         </section>
-
-        <!-- Toast 消息提示 -->
-        <div id="toast" class="toast">
-            <span class="toast-message"></span>
-        </div>
     </main>
 
-    <footer class="footer">
+    <!-- Toast 消息提示 -->
+    <div id="toast" class="toast">
+        <span class="toast-message"></span>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="app-footer">
         <p>&copy; 2025 LineWeaver - 简单实用的文本处理工具</p>
     </footer>
 
