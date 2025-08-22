@@ -1,15 +1,84 @@
-# 文本换行符去除工具
+<div align="center">
 
-一个简单实用的静态网页应用，用于去除文本中的所有换行符，将多行文本转换为连续的单行文本，并支持一键复制到剪贴板。
+# 🌊 TextFlow
 
-## 🚀 功能特性
+### 一个简单优雅的文本换行符去除工具
 
-- **文本处理**: 智能去除所有类型的换行符（`\n`、`\r\n`、`\r`）
-- **空格优化**: 自动合并多个连续空格为单个空格
-- **一键复制**: 支持现代浏览器 Clipboard API 和降级方案
-- **响应式设计**: 完美适配桌面端、平板端和移动端
-- **用户体验**: 实时状态反馈、Toast 消息提示、键盘快捷键支持
-- **无障碍支持**: 支持高对比度模式和减少动画偏好
+*让文本像流水般顺畅连续，无需手动处理换行符*
+
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/MisonL/LineWeaver/blob/main/LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/MisonL/LineWeaver.svg)](https://github.com/MisonL/LineWeaver/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/MisonL/LineWeaver.svg)](https://github.com/MisonL/LineWeaver/network)
+[![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://hub.docker.com/)
+[![Nginx](https://img.shields.io/badge/nginx-optimized-green.svg)](https://nginx.org/)
+
+[**🚀 在线体验**](https://misonl.github.io/LineWeaver) | [📚 文档](#-使用指南) 
+
+---
+
+</div>
+
+## 🎆 亮点特性
+
+<table>
+<tr>
+<td width="50%">
+
+### 📝 文本处理
+- 智能识别所有类型换行符
+- 自动合并多余空格
+- 保持文本语义的完整性
+
+### 🔥 一键操作
+- 现代 Clipboard API 支持
+- 智能降级方案
+- 键盘快捷键支持
+
+</td>
+<td width="50%">
+
+### 📱 响应式设计
+- 桌面端、平板、手机完美适配
+- 多尺寸断点优化
+- 触控友好的交互设计
+
+### 🌈 用户体验
+- 实时状态反馈
+- Toast 消息提示
+- 无障碍访问支持
+
+</td>
+</tr>
+</table>
+
+## 📚 使用指南
+
+<div align="center">
+
+### 🚀 三步快速上手
+
+</div>
+
+```
+flowchart LR
+    A[📝 输入多行文本] --> B[🔄 点击转换按钮]
+    B --> C[📋 一键复制结果]
+    
+    style A fill:#e1f5fe
+    style B fill:#f3e5f5
+    style C fill:#e8f5e8
+```
+
+<details>
+<summary><b>🔑 键盘快捷键</b></summary>
+
+| 快捷键 | 功能 | 描述 |
+|---------|------|------|
+| `Ctrl/Cmd + Enter` | 🔄 转换文本 | 快速处理输入的文本 |
+| `Ctrl/Cmd + D` | 📋 复制结果 | 将结果复制到剪贴板 |
+| `Escape` | 🧹 清空内容 | 清除所有输入和输出 |
+
+</details>
 
 ## 🎯 使用方法
 
@@ -29,7 +98,7 @@
 
 ### 推荐方式 - 使用 Nginx
 
-```bash
+```
 # 1. 安装 Nginx（如果未安装）
 # macOS
 brew install nginx
@@ -57,7 +126,7 @@ open http://localhost/text-line-remover/
 
 ### 其他静态文件服务器选择
 
-```bash
+```
 # 使用 Node.js serve 工具
 npx serve . -p 8080
 
@@ -72,25 +141,34 @@ php -S localhost:8080
 
 ## 🐳 Docker 部署
 
-### 快速开始
+<div align="center">
 
-使用 Docker Compose 是最简单的部署方式：
+### ✨ 一键部署，即删即用
 
-```bash
+[![Docker Pulls](https://img.shields.io/docker/pulls/nginx.svg)](https://hub.docker.com/_/nginx)
+[![Docker Image Size](https://img.shields.io/docker/image-size/nginx/alpine.svg)](https://hub.docker.com/_/nginx)
+
+</div>
+
+### 🚀 快速开始
+
+```
 # 克隆项目
-git clone <repository-url>
-cd 去除换行符
+git clone https://github.com/MisonL/LineWeaver.git
+cd LineWeaver
 
-# 使用 Docker Compose 构建和启动
+# 一键部署
+./deploy.sh
+# 或者
 docker-compose up -d
 
-# 访问应用
-open http://localhost:8080
+# 🎉 访问应用
+open http://localhost:8090
 ```
 
-### 单独使用 Docker
+### 🛠️ 单独使用 Docker
 
-```bash
+```
 # 构建镜像
 docker build -t text-line-remover .
 
@@ -112,7 +190,7 @@ docker logs text-line-remover-app
 
 使用带有反向代理的生产配置：
 
-```bash
+```
 # 启动生产环境（包含反向代理）
 docker-compose --profile production up -d
 
@@ -132,7 +210,7 @@ docker-compose ps
 
 ### 常用 Docker 命令
 
-```bash
+```
 # 查看容器日志
 docker-compose logs -f text-line-remover
 
@@ -155,7 +233,7 @@ docker exec -it text-line-remover-app /bin/sh
 
 可以通过环境变量自定义配置：
 
-```bash
+```
 # .env 文件示例
 NGINX_HOST=localhost
 NGINX_PORT=80
@@ -164,7 +242,7 @@ LOG_LEVEL=warn
 
 ### 数据持久化
 
-```bash
+```
 # 创建日志目录
 mkdir -p ./logs
 
@@ -175,7 +253,7 @@ docker-compose up -d
 ## 📁 项目结构
 
 ```
-text-line-remover/
+LineWeaver/
 ├── index.html              # 主页面文件
 ├── test.html               # 功能测试页面
 ├── styles/
@@ -190,7 +268,9 @@ text-line-remover/
 ├── docker-compose.yml      # Docker Compose 配置
 ├── nginx.conf              # Nginx 服务器配置
 ├── .dockerignore           # Docker 构建忽略文件
+├── .gitignore              # Git 忽略文件
 ├── deploy.sh               # 一键部署脚本
+├── LICENSE                 # MIT 许可证
 └── README.md               # 项目说明文档
 ```
 
@@ -390,30 +470,60 @@ location ~* \.(css|js|html)$ {
 - **本地处理**: 所有文本处理在客户端完成
 - **HTTPS 推荐**: 获得最佳剪贴板 API 支持
 
-## 🤝 贡献指南
+## 👥 贡献指南
 
-欢迎提交 Issue 和 Pull Request：
+欢迎您的贡献！让我们一起让 TextFlow 变得更好。
 
-1. Fork 项目
-2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 创建 Pull Request
+<div align="center">
 
-## 📄 许可证
+### 🚀 快速参与
 
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
+[![GitHub issues](https://img.shields.io/github/issues/MisonL/LineWeaver.svg)](https://github.com/MisonL/LineWeaver/issues)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr/MisonL/LineWeaver.svg)](https://github.com/MisonL/LineWeaver/pulls)
 
-## 🔗 相关链接
+</div>
 
-- [MDN Clipboard API](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard_API)
-- [CSS Grid 完整指南](https://css-tricks.com/snippets/css/complete-guide-grid/)
-- [响应式设计最佳实践](https://web.dev/responsive-web-design-basics/)
+### 📝 贡献步骤
 
-## 📧 联系方式
+1. **🍴 Fork** 项目
+2. **🌱 创建**功能分支 (`git checkout -b feature/AmazingFeature`)
+3. **✨ 提交**更改 (`git commit -m 'Add some AmazingFeature'`)
+4. **🚀 推送**到分支 (`git push origin feature/AmazingFeature`)
+5. **💌 创建** Pull Request
 
-如有问题或建议，请创建 Issue 或联系开发者。
+### 🐛 报告问题
+
+发现了 Bug？有新想法？[**点击这里创建 Issue**](https://github.com/MisonL/LineWeaver/issues/new)
 
 ---
 
-**享受无换行符的纯净文本体验！** ✨
+<div align="center">
+
+## 📜 许可证
+
+**TextFlow** 采用 [MIT 许可证](LICENSE) 开源
+
+您可以自由使用、修改和分发本项目
+
+---
+
+## 🎆 致谢
+
+感谢所有为 TextFlow 做出贡献的开发者！
+
+### 📚 相关链接
+
+- [MDN Clipboard API](https://developer.mozilla.org/docs/Web/API/Clipboard_API)
+- [Nginx 配置指南](https://nginx.org/en/docs/)
+- [Docker 最佳实践](https://docs.docker.com/develop/dev-best-practices/)
+- [CSS Grid 完整指南](https://css-tricks.com/snippets/css/complete-guide-grid/)
+
+---
+
+### ✨ 支持一下
+
+如果这个项目对您有帮助，请给个 **⭐ Star**！
+
+**享受无换行符的纯净文本体验！** 🌊
+
+</div>

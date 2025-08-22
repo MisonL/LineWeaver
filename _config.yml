@@ -1,0 +1,34 @@
+# GitHub Pages Jekyll 配置
+# 禁用Jekyll处理，使用纯静态文件
+
+plugins: []
+markdown: kramdown
+highlighter: rouge
+
+# 排除不需要的文件
+exclude:
+  - README.md
+  - Dockerfile
+  - docker-compose.yml
+  - nginx.conf
+  - .dockerignore
+  - .gitignore
+  - deploy.sh
+  - server.sh
+  - logs/
+  - .qoder/
+
+# 包含的文件
+include:
+  - .htaccess
+
+# 基本设置
+title: "TextFlow - 文本换行符去除工具"
+description: "一个简单优雅的文本换行符去除工具，让文本像流水般顺畅连续"
+url: "https://yourusername.github.io"
+baseurl: "/textflow"
+
+# 构建设置
+safe: true
+incremental: false
+lsi: false

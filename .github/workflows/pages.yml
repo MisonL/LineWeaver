@@ -1,0 +1,107 @@
+name: Deploy TextFlow to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Create deployment directory
+        run: |
+          mkdir -p _site
+          cp index.html _site/
+          cp test.html _site/
+          cp -r styles/ _site/styles/
+          cp -r scripts/ _site/scripts/
+          cp -r assets/ _site/assets/ 2>/dev/null || mkdir -p _site/assets/
+          
+          # 创建一个简单的404页面
+          cat > _site/404.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="zh-CN">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>页面未找到 - TextFlow</title>
+              <style>
+                  body { 
+                      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                      text-align: center; 
+                      padding: 50px; 
+                      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                      color: white;
+                      min-height: 100vh;
+                      margin: 0;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                  }
+                  .container {
+                      background: rgba(255, 255, 255, 0.1);
+                      padding: 40px;
+                      border-radius: 15px;
+                      backdrop-filter: blur(10px);
+                  }
+                  h1 { font-size: 3rem; margin: 0 0 20px 0; }
+                  p { font-size: 1.2rem; margin: 20px 0; }
+                  a { 
+                      color: white; 
+                      text-decoration: none; 
+                      padding: 15px 30px; 
+                      background: rgba(255, 255, 255, 0.2); 
+                      border-radius: 25px; 
+                      display: inline-block; 
+                      margin-top: 20px;
+                      transition: all 0.3s ease;
+                  }
+                  a:hover { 
+                      background: rgba(255, 255, 255, 0.3); 
+                      transform: translateY(-2px);
+                  }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <h1>🌊 404</h1>
+                  <p>抱歉，您访问的页面不存在</p>
+                  <p>让我们回到 TextFlow 继续体验吧！</p>
+                  <a href="/">🏠 返回首页</a>
+              </div>
+          </body>
+          </html>
+          EOF
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
