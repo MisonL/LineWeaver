@@ -37,6 +37,16 @@
         padding: calc(var(--spacing) * 1.5) calc(var(--spacing) * 2);
         font-size: 0.95rem;
     }
+    
+    /* 按钮组平板适配 */
+    .button-group {
+        gap: calc(var(--spacing) * 1);
+    }
+    
+    .example-btn {
+        padding: calc(var(--spacing) * 1.5) calc(var(--spacing) * 2);
+        font-size: 0.9rem;
+    }
 
     /* 模式选择器平板适配 */
     .mode-options {
@@ -69,6 +79,12 @@
     
     .config-row input[type="text"] {
         width: 100%;
+    }
+    
+    /* 文本统计平板适配 */
+    .text-stats {
+        gap: calc(var(--spacing) * 1);
+        font-size: 0.8rem;
     }
 
     /* 优化 Toast 位置 */
@@ -150,7 +166,34 @@
     .custom-config {
         padding: calc(var(--spacing) * 1.5);
     }
+    
+    /* 文本统计移动端优化 */
+    .text-stats {
+        flex-wrap: wrap;
+        gap: calc(var(--spacing) * 0.75);
+        font-size: 0.75rem;
+        padding: calc(var(--spacing) * 1);
+    }
+    
+    .stats-divider {
+        display: none; /* 移动端隐藏分隔符 */
+    }
 
+    /* 按钮组移动端优化 */
+    .button-group {
+        flex-direction: column;
+        gap: calc(var(--spacing) * 1);
+    }
+    
+    .convert-btn {
+        flex: none;
+    }
+    
+    .example-btn {
+        font-size: 0.85rem;
+        padding: calc(var(--spacing) * 1.25) calc(var(--spacing) * 1.5);
+    }
+    
     /* 优化触控体验 */
     .convert-btn,
     .copy-btn {

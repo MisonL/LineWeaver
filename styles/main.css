@@ -172,6 +172,37 @@ body {
     box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
 }
 
+/* 文本统计样式 */
+.text-stats {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--spacing) * 1.5);
+    margin: calc(var(--spacing) * 1.5) 0;
+    padding: calc(var(--spacing) * 1.5);
+    background: #f1f5f9;
+    border-radius: calc(var(--radius) * 0.75);
+    border: 1px solid #e2e8f0;
+    font-size: 0.875rem;
+    color: #475569;
+}
+
+.stats-item {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--spacing) * 0.5);
+    font-weight: 500;
+}
+
+.stats-item span {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.stats-divider {
+    color: #cbd5e1;
+    font-weight: 300;
+}
+
 /* 文本输入输出框 */
 .input-textarea,
 .output-textarea {
@@ -202,6 +233,37 @@ body {
 .output-textarea {
     background-color: #f9fafb;
     cursor: text;
+}
+
+/* 按钮组和示例按钮样式 */
+.button-group {
+    display: flex;
+    gap: calc(var(--spacing) * 1.5);
+    margin-top: calc(var(--spacing) * 2);
+}
+
+.example-btn {
+    background-color: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    flex-shrink: 0;
+    padding: calc(var(--spacing) * 2) calc(var(--spacing) * 3);
+    border-radius: var(--radius);
+    font-family: var(--font-family);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.example-btn:hover {
+    background-color: #e2e8f0;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(71, 85, 105, 0.2);
+}
+
+.convert-btn {
+    flex: 1;
 }
 
 /* 按钮样式 */

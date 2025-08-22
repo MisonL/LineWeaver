@@ -57,10 +57,16 @@
                 placeholder="请在此粘贴需要处理的多行文本..."
                 rows="6"
             ></textarea>
-            <button id="convertBtn" class="convert-btn">
-                <span class="btn-text">转换文本</span>
-                <span class="btn-loading" style="display: none;">处理中...</span>
-            </button>
+            
+            <div class="button-group">
+                <button id="convertBtn" class="convert-btn">
+                    <span class="btn-text">转换文本</span>
+                    <span class="btn-loading" style="display: none;">处理中...</span>
+                </button>
+                <button id="exampleBtn" class="example-btn" type="button">
+                    💡 加载示例
+                </button>
+            </div>
         </section>
 
         <section class="output-section">
@@ -72,6 +78,15 @@
                 rows="6"
                 readonly
             ></textarea>
+            
+            <!-- 简单的文本统计 -->
+            <div class="text-stats" id="textStats" style="display: none;">
+                <span class="stats-item">🔢 <span id="charCount">0</span> 字符</span>
+                <span class="stats-item">🗺️ <span id="wordCount">0</span> 词语</span>
+                <span class="stats-divider">|</span>
+                <span class="stats-item">✨ 已缩减 <span id="savedChars">0</span> 字符</span>
+            </div>
+            
             <button id="copyBtn" class="copy-btn" disabled>
                 <span class="btn-text">复制到剪贴板</span>
                 <span class="btn-success" style="display: none;">复制成功!</span>

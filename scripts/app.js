@@ -129,6 +129,12 @@ function bindEventListeners() {
         Elements.copyBtn.addEventListener('click', handleCopy);
     }
     
+    // 示例按钮点击事件
+    const exampleBtn = document.getElementById('exampleBtn');
+    if (exampleBtn) {
+        exampleBtn.addEventListener('click', handleLoadExample);
+    }
+    
     // 输入框变化事件（使用防抖优化性能）
     if (Elements.inputText) {
         const debouncedInputHandler = TextUtils.debounce(handleInputChange, 300);
@@ -188,6 +194,9 @@ async function handleConvert() {
         AppState.inputText = inputText;
         AppState.outputText = processedText;
         
+        // 更新文本统计
+        updateTextStats(inputText, processedText);
+        
         // 更新UI状态
         updateUIState();
         
@@ -213,6 +222,97 @@ async function handleConvert() {
         TextUtils.showToast('处理文本时出现错误，请重试', 'error');
     } finally {
         setProcessingState(false);
+    }
+}
+
+/**
+ * 处理加载示例按钮点击
+ */
+function handleLoadExample() {
+    const examples = [
+        // 简单示例
+        `LineWeaver 使用指南：
+
+基础功能：
+1. 粘贴多行文本
+2. 选择处理模式
+3. 点击转换按钮
+
+高级特性：
+- 智能模式保留结构
+- 自定义分隔符
+- 一键复制结果`,
+        
+        // AI对话示例
+        `AI对话优化文本：
+
+问题描述：
+如何使用 Qwen Code 进行代码生成？
+
+解决方案：
+1. 准备清晰的需求描述
+2. 提供具体的代码示例
+3. 说明期望的输出格式
+
+注意事项：
+- 保持文本结构清晰
+- 使用适当的标识符`,
+        
+        // 技术文档示例
+        `项目技术文档：
+
+## 概述
+这是一个文本处理工具。
+
+## 功能特性
+
+### 核心功能
+1. 换行符去除
+2. 空格合并
+3. 结构保持
+
+### 高级功能
+- 多模式支持
+- 自定义配置
+- 实时统计`
+    ];
+    
+    const randomExample = examples[Math.floor(Math.random() * examples.length)];
+    
+    if (Elements.inputText) {
+        Elements.inputText.value = randomExample;
+        Elements.inputText.focus();
+        
+        // 触发输入变化事件
+        const event = new Event('input', { bubbles: true });
+        Elements.inputText.dispatchEvent(event);
+        
+        TextUtils.showToast('示例文本已加载，可以开始试用了！', 'info');
+    }
+}
+
+/**
+ * 更新文本统计显示
+ */
+function updateTextStats(originalText, processedText) {
+    const textStats = document.getElementById('textStats');
+    const charCount = document.getElementById('charCount');
+    const wordCount = document.getElementById('wordCount');
+    const savedChars = document.getElementById('savedChars');
+    
+    if (!textStats || !charCount || !wordCount || !savedChars) return;
+    
+    if (processedText) {
+        const processedStats = TextUtils.getTextStats(processedText);
+        const savedCharCount = originalText.length - processedText.length;
+        
+        charCount.textContent = processedStats.characters.toLocaleString();
+        wordCount.textContent = processedStats.words.toLocaleString();
+        savedChars.textContent = savedCharCount > 0 ? savedCharCount.toLocaleString() : '0';
+        
+        textStats.style.display = 'flex';
+    } else {
+        textStats.style.display = 'none';
     }
 }
 
@@ -277,6 +377,12 @@ function handleInputChange(event) {
         Elements.outputText.value = '';
     }
     AppState.outputText = '';
+    
+    // 隐藏统计显示
+    const textStats = document.getElementById('textStats');
+    if (textStats) {
+        textStats.style.display = 'none';
+    }
     
     // 更新UI状态
     updateUIState();
