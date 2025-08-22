@@ -3,19 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>文本换行符去除工具</title>
+    <title>LineWeaver - 文本换行符去除工具</title>
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/responsive.css">
 </head>
 <body>
     <main class="container">
         <header class="header">
-            <h1 class="title">文本换行符去除工具</h1>
+            <h1 class="title">LineWeaver</h1>
             <p class="description">粘贴多行文本，点击转换去除所有换行符，生成连续文本并支持一键复制</p>
         </header>
 
         <section class="input-section">
             <h2 class="section-title">输入文本</h2>
+            
+            <!-- 处理模式选择 -->
+            <div class="mode-selector">
+                <label class="mode-title">📋 处理模式：</label>
+                <div class="mode-options">
+                    <label class="mode-option">
+                        <input type="radio" name="processMode" value="simple" checked>
+                        <span class="mode-label">🔄 简单模式</span>
+                        <small class="mode-desc">直接去除换行符，用空格连接</small>
+                    </label>
+                    <label class="mode-option">
+                        <input type="radio" name="processMode" value="smart">
+                        <span class="mode-label">🧠 智能模式</span>
+                        <small class="mode-desc">保留结构标识，适合AI对话</small>
+                    </label>
+                    <label class="mode-option">
+                        <input type="radio" name="processMode" value="custom">
+                        <span class="mode-label">🎨 自定义模式</span>
+                        <small class="mode-desc">自定义分隔符，灵活配置</small>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- 自定义模式配置 -->
+            <div class="custom-config" id="customConfig" style="display: none;">
+                <div class="config-row">
+                    <label>段落分隔符：</label>
+                    <input type="text" id="paragraphSeparator" value="[PARA]" placeholder="输入段落分隔符">
+                </div>
+                <div class="config-row">
+                    <label>列表分隔符：</label>
+                    <input type="text" id="listSeparator" value="[LIST]" placeholder="输入列表分隔符">
+                </div>
+            </div>
+            
             <textarea 
                 id="inputText" 
                 class="input-textarea" 
@@ -50,7 +85,7 @@
     </main>
 
     <footer class="footer">
-        <p>&copy; 2025 文本换行符去除工具 - 简单实用的文本处理工具</p>
+        <p>&copy; 2025 LineWeaver - 简单实用的文本处理工具</p>
     </footer>
 
     <script src="scripts/utils.js"></script>

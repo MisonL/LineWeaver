@@ -77,6 +77,101 @@ body {
     color: var(--text-color);
 }
 
+/* 模式选择器样式 */
+.mode-selector {
+    margin-bottom: calc(var(--spacing) * 3);
+    padding: calc(var(--spacing) * 2);
+    background: #f8fafc;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-color);
+}
+
+.mode-title {
+    display: block;
+    font-weight: 600;
+    margin-bottom: calc(var(--spacing) * 2);
+    color: var(--text-color);
+}
+
+.mode-options {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing) * 1.5);
+}
+
+.mode-option {
+    display: flex;
+    align-items: flex-start;
+    gap: calc(var(--spacing) * 1.5);
+    cursor: pointer;
+    padding: calc(var(--spacing) * 1.5);
+    border-radius: calc(var(--radius) * 0.75);
+    transition: background-color 0.2s ease;
+}
+
+.mode-option:hover {
+    background-color: rgba(37, 99, 235, 0.05);
+}
+
+.mode-option input[type="radio"] {
+    margin: 0;
+    margin-top: 2px;
+}
+
+.mode-label {
+    font-weight: 500;
+    color: var(--text-color);
+    display: block;
+    margin-bottom: 2px;
+}
+
+.mode-desc {
+    color: #6b7280;
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+/* 自定义配置样式 */
+.custom-config {
+    margin-bottom: calc(var(--spacing) * 3);
+    padding: calc(var(--spacing) * 2);
+    background: #f1f5f9;
+    border-radius: var(--radius);
+    border: 1px solid #cbd5e1;
+}
+
+.config-row {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--spacing) * 2);
+    margin-bottom: calc(var(--spacing) * 1.5);
+}
+
+.config-row:last-child {
+    margin-bottom: 0;
+}
+
+.config-row label {
+    font-weight: 500;
+    min-width: 100px;
+    color: var(--text-color);
+}
+
+.config-row input[type="text"] {
+    flex: 1;
+    padding: calc(var(--spacing) * 1);
+    border: 1px solid var(--border-color);
+    border-radius: calc(var(--radius) * 0.75);
+    font-family: var(--font-family);
+    font-size: 0.875rem;
+}
+
+.config-row input[type="text"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
 /* 文本输入输出框 */
 .input-textarea,
 .output-textarea {

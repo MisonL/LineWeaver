@@ -17,16 +17,19 @@ exclude:
   - server.sh
   - logs/
   - .qoder/
+  - GITHUB_PAGES_SETUP.md
+  - status.html
+  - check-pages.sh
 
 # 包含的文件
 include:
   - .htaccess
 
 # 基本设置
-title: "TextFlow - 文本换行符去除工具"
+title: "LineWeaver - 文本换行符去除工具"
 description: "一个简单优雅的文本换行符去除工具，让文本像流水般顺畅连续"
-url: "https://yourusername.github.io"
-baseurl: "/textflow"
+url: "https://misonl.github.io"
+baseurl: "/LineWeaver"
 
 # 构建设置
 safe: true

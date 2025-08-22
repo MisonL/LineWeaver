@@ -1,22 +1,37 @@
 <div align="center">
 
-# 🌊 TextFlow
+# 🌊 LineWeaver
 
 ### 一个简单优雅的文本换行符去除工具
 
 *让文本像流水般顺畅连续，无需手动处理换行符*
 
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/MisonL/LineWeaver/blob/main/LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/MisonL/LineWeaver.svg)](https://github.com/MisonL/LineWeaver/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/MisonL/LineWeaver.svg)](https://github.com/MisonL/LineWeaver/network)
-[![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://hub.docker.com/)
-[![Nginx](https://img.shields.io/badge/nginx-optimized-green.svg)](https://nginx.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![GitHub stars](https://img.shields.io/github/stars/MisonL/LineWeaver.svg?style=social&label=Star)](https://github.com/MisonL/LineWeaver)
+[![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
+[![Nginx](https://img.shields.io/badge/nginx-%23009639.svg?style=flat&logo=nginx&logoColor=white)](https://nginx.org/)
 
-[**🚀 在线体验**](https://misonl.github.io/LineWeaver/) | [📚 文档](#-使用指南) 
+[**🚀 在线体验**](https://misonl.github.io/LineWeaver/) | [📚 文档](#-使用指南) | [🐳 Docker](#-docker-部署) | [💬 问题反馈](https://github.com/MisonL/LineWeaver/issues)
 
 ---
 
 </div>
+
+## 🎯 项目背景
+
+在日常开发和文本处理过程中，我们经常遇到这样的问题：
+
+- **Qwen Code** 等AI代码助手无法完整粘贴包含换行符的多行文本
+- **Gemini CLI** 工具在处理复杂文本格式时存在限制
+- 手动去除换行符费时费力，容易出错
+- 需要快速将多行文本转换为连续文本用于AI对话
+
+为了解决这些实际问题，使用 [**Qoder IDE**](https://qoder.com) 开发了这个简单实用的静态Web工具。它能够：
+
+✨ **一键去除换行符** - 将多行文本转换为连续文本  
+🚀 **即开即用** - 无需安装，浏览器直接使用  
+📋 **智能复制** - 支持现代剪贴板API，一键复制结果  
+🌐 **随时可用** - 静态部署，访问速度快
 
 ## 🎆 亮点特性
 
@@ -82,6 +97,56 @@ flowchart LR
 
 ## 🎯 使用方法
 
+### 📋 处理模式选择
+
+LineWeaver提供多种处理模式，解决不同场景下的文本处理需求：
+
+#### 1. 🔄 **简单模式**（默认）
+- 直接去除所有换行符，用空格连接
+- 适用场景：纯文本段落、简单描述
+- 示例：`行1\n行2` → `行1 行2`
+
+#### 2. 🧠 **智能模式**（推荐用于AI对话）
+- 保留重要的文本结构标识
+- 列表项前添加分隔标识 `[LIST]`
+- 段落间添加分隔标识 `[PARA]`
+- 代码块保持独立 `[CODE]...`
+- 适用场景：向AI工具粘贴复杂文档内容
+
+#### 3. 🎨 **自定义模式**
+- 用户可自定义分隔符和标识符
+- 灵活适应不同AI工具的理解习惯
+
+### 💡 智能模式示例
+
+**输入：**
+```
+这是第一段文本。
+这是同一段的第二行。
+
+这是第二段文本。
+
+1. 第一个列表项
+2. 第二个列表项
+3. 第三个列表项
+
+```python
+code_example = "示例代码"
+```
+```
+
+**智能模式输出：**
+```
+这是第一段文本。这是同一段的第二行。[PARA]这是第二段文本。[PARA][LIST]1. 第一个列表项[LIST]2. 第二个列表项[LIST]3. 第三个列表项[PARA][CODE]python\ncode_example = "示例代码"[/CODE]
+```
+
+这样AI工具能够：
+- 识别段落边界 `[PARA]`
+- 理解列表结构 `[LIST]`
+- 保持代码完整性 `[CODE]...[/CODE]`
+
+### 基本操作步骤
+
 1. **输入文本**: 在输入框中粘贴或输入包含换行符的多行文本
 2. **转换处理**: 点击"转换文本"按钮或使用快捷键 `Ctrl/Cmd + Enter`
 3. **复制结果**: 点击"复制到剪贴板"按钮或使用快捷键 `Ctrl/Cmd + D`
@@ -111,17 +176,17 @@ sudo yum install nginx
 
 # 2. 配置 Nginx
 # 将项目文件复制到 nginx 网站目录
-sudo cp -r . /var/www/html/text-line-remover/
+sudo cp -r . /var/www/html/LineWeaver/
 
 # 或者创建自定义配置
-sudo nano /etc/nginx/sites-available/text-line-remover
+sudo nano /etc/nginx/sites-available/LineWeaver
 
 # 3. 启动 Nginx
 sudo systemctl start nginx
 sudo systemctl enable nginx
 
 # 访问应用
-open http://localhost/text-line-remover/
+open http://localhost/LineWeaver/
 ```
 
 ### 其他静态文件服务器选择
@@ -145,9 +210,6 @@ php -S localhost:8080
 
 ### ✨ 一键部署，即删即用
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/nginx.svg)](https://hub.docker.com/_/nginx)
-[![Docker Image Size](https://img.shields.io/docker/image-size/nginx/alpine.svg)](https://hub.docker.com/_/nginx)
-
 </div>
 
 ### 🚀 快速开始
@@ -170,20 +232,20 @@ open http://localhost:8090
 
 ```
 # 构建镜像
-docker build -t text-line-remover .
+docker build -t lineweaver .
 
 # 运行容器
 docker run -d \
-  --name text-line-remover-app \
+  --name lineweaver-app \
   -p 8080:80 \
   --restart unless-stopped \
-  text-line-remover
+  lineweaver
 
 # 查看容器状态
 docker ps
 
 # 查看应用日志
-docker logs text-line-remover-app
+docker logs lineweaver-app
 ```
 
 ### 生产环境部署
@@ -212,7 +274,7 @@ docker-compose ps
 
 ```
 # 查看容器日志
-docker-compose logs -f text-line-remover
+docker-compose logs -f lineweaver
 
 # 重启服务
 docker-compose restart
@@ -226,7 +288,7 @@ docker-compose up -d
 docker system prune -a
 
 # 进入容器调试
-docker exec -it text-line-remover-app /bin/sh
+docker exec -it lineweaver-app /bin/sh
 ```
 
 ### 环境变量配置
@@ -249,6 +311,17 @@ mkdir -p ./logs
 # 日志将自动挂载到 ./logs 目录
 docker-compose up -d
 ```
+
+## 🛠️ 开发工具
+
+本项目使用 [**Qoder IDE**](https://qoder.com) 进行开发，充分利用了其强大的AI辅助编程功能：
+
+- 🤖 **AI代码生成**: 自动生成高质量HTML/CSS/JavaScript代码
+- 📝 **文档编写**: AI辅助编写规范化的README文档
+- 🐳 **部署配置**: 自动生成Docker和Nginx配置文件
+- ⚙️ **项目管理**: 智能化项目结构和依赖管理
+
+这个项目展示了如何利用现代AI工具快速构建实用的Web应用程序。
 
 ## 📁 项目结构
 
@@ -275,6 +348,10 @@ LineWeaver/
 ```
 
 ## 🛠️ 技术实现
+
+### 开发背景
+
+该项目的诞生源于实际需求：在使用**Qwen Code**、**Gemini CLI**等AI工具时，经常遇到无法完整粘贴包含换行符的文本内容的问题。为了解决这个痛点，使用[**Qoder IDE**](https://qoder.com)快速开发了这个纯前端的文本处理工具。
 
 ### 服务器架构
 
@@ -395,13 +472,13 @@ brew install nginx  # macOS
 # 或 sudo apt install nginx  # Ubuntu
 
 # 2. 创建站点配置
-sudo nano /etc/nginx/sites-available/text-line-remover
+sudo nano /etc/nginx/sites-available/LineWeaver
 
 # 3. 配置内容：
 server {
     listen 80;
     server_name localhost;
-    root /var/www/html/text-line-remover;
+    root /var/www/html/LineWeaver;
     index index.html;
     
     # Gzip 压缩
@@ -421,7 +498,7 @@ server {
 }
 
 # 4. 启用站点
-sudo ln -s /etc/nginx/sites-available/text-line-remover /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/LineWeaver /etc/nginx/sites-enabled/
 sudo nginx -t  # 测试配置
 sudo systemctl reload nginx
 
@@ -464,6 +541,74 @@ location ~* \.(css|js|html)$ {
 }
 ```
 
+## 🤔 为什么需要智能处理模式？
+
+### 传统方法的问题
+
+单纯去除换行符虽然解决了AI工具的粘贴限制，但可能导致以下问题：
+
+1. **语义丢失**：段落边界消失，AI无法理解文本结构
+2. **列表破坏**：有序/无序列表变成连续文本，失去层次性
+3. **上下文混乱**：不同主题内容被强制连接
+
+### LineWeaver的解决方案
+
+#### 🧠 智能模式的优势
+
+- **保留结构**：使用 `[PARA]` 标识段落边界
+- **列表识别**：自动为列表项添加 `[LIST]` 标识
+- **AI友好**：让AI工具能够理解原始文本结构
+- **通用性**：适用于 Qwen Code、Gemini CLI、ChatGPT 等各种AI工具
+
+#### 🎯 实际效果对比
+
+**原始文本：**
+```
+项目介绍：
+这是一个很棒的项目。
+
+主要功能：
+1. 功能一
+2. 功能二
+3. 功能三
+
+注意事项：
+- 重要提醒
+- 使用建议
+```
+
+**简单模式输出：**
+```
+项目介绍： 这是一个很棒的项目。 主要功能： 1. 功能一 2. 功能二 3. 功能三 注意事项： - 重要提醒 - 使用建议
+```
+*❌ AI可能误解为一个连续的句子*
+
+**智能模式输出：**
+```
+项目介绍： 这是一个很棒的项目。[PARA]主要功能：[PARA][LIST]1. 功能一 [LIST]2. 功能二 [LIST]3. 功能三[PARA]注意事项：[PARA][LIST]- 重要提醒 [LIST]- 使用建议
+```
+*✅ AI能够正确理解段落结构和列表层次*
+
+### 🎨 自定义模式的灵活性
+
+不同的AI工具可能有不同的理解习惯，自定义模式允许你：
+
+- 使用 `||` 作为段落分隔符
+- 使用 `->` 作为列表标识
+- 根据具体AI工具的最佳实践调整标识符
+
+### 📊 使用建议
+
+| 使用场景 | 推荐模式 | 原因 |
+|---------|---------|------|
+| 纯文本段落 | 🔄 简单模式 | 无结构信息丢失风险 |
+| 包含列表的文档 | 🧠 智能模式 | 保持列表结构清晰 |
+| 多段落文章 | 🧠 智能模式 | 保留段落逻辑关系 |
+| 特定AI工具优化 | 🎨 自定义模式 | 针对性调优 |
+| 技术文档、说明书 | 🧠 智能模式 | 结构复杂，需要保留层次 |
+
+---
+
 ## 🔒 安全性
 
 - **无后端依赖**: 纯前端实现，数据不上传
@@ -472,7 +617,7 @@ location ~* \.(css|js|html)$ {
 
 ## 👥 贡献指南
 
-欢迎您的贡献！让我们一起让 TextFlow 变得更好。
+欢迎您的贡献！让我们一起让 LineWeaver 变得更好。
 
 <div align="center">
 
@@ -501,7 +646,7 @@ location ~* \.(css|js|html)$ {
 
 ## 📜 许可证
 
-**TextFlow** 采用 [MIT 许可证](LICENSE) 开源
+**LineWeaver** 采用 [MIT 许可证](LICENSE) 开源
 
 您可以自由使用、修改和分发本项目
 
@@ -509,7 +654,7 @@ location ~* \.(css|js|html)$ {
 
 ## 🎆 致谢
 
-感谢所有为 TextFlow 做出贡献的开发者！
+感谢所有为 LineWeaver 做出贡献的开发者！
 
 ### 📚 相关链接
 

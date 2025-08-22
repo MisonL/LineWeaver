@@ -22,6 +22,122 @@ function removeLineBreaks(text) {
 }
 
 /**
+ * 智能处理文本 - 保留结构标识
+ * @param {string} text - 需要处理的文本
+ * @param {Object} options - 处理选项
+ * @returns {string} 处理后的文本
+ */
+function smartProcessText(text, options = {}) {
+    if (!text || typeof text !== 'string') {
+        return '';
+    }
+    
+    const {
+        paragraphSeparator = '[PARA]',
+        listSeparator = '[LIST]',
+        preserveCode = true
+    } = options;
+    
+    // 特殊字符转义函数
+    const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    
+    let result = text;
+    
+    // 1. 保护代码块
+    const codeBlocks = [];
+    if (preserveCode) {
+        // 匹配```代码块
+        result = result.replace(/```[\s\S]*?```/g, (match, index) => {
+            const placeholder = `__CODE_BLOCK_${codeBlocks.length}__`;
+            codeBlocks.push(match.replace(/\n/g, '\\n'));
+            return placeholder;
+        });
+        
+        // 匹配单行代码
+        result = result.replace(/`[^`\n]+`/g, (match) => {
+            const placeholder = `__INLINE_CODE_${codeBlocks.length}__`;
+            codeBlocks.push(match);
+            return placeholder;
+        });
+    }
+    
+    // 2. 处理段落（空行分隔）
+    result = result.replace(/\n\s*\n/g, ` ${paragraphSeparator} `);
+    
+    // 3. 处理列表项（数字或项目符号开头）
+    const listPatterns = [
+        /^\s*\d+[\.\)\uff09]\s+/gm,  // 数字列表：1. 2) 3）
+        /^\s*[-\*\+\u2022]\s+/gm,      // 项目符号列表：- * + •
+        /^\s*[a-zA-Z][\.\)]\s+/gm,    // 字母列表：a. b)
+    ];
+    
+    listPatterns.forEach(pattern => {
+        result = result.replace(pattern, `${listSeparator}$&`);
+    });
+    
+    // 4. 去除剩余的换行符
+    result = result.replace(/\n/g, ' ');
+    
+    // 5. 清理多余空格
+    result = result.replace(/\s+/g, ' ');
+    
+    // 6. 恢复代码块
+    if (preserveCode && codeBlocks.length > 0) {
+        codeBlocks.forEach((code, index) => {
+            if (code.includes('```')) {
+                // 多行代码块
+                const cleanCode = code.replace(/\\n/g, '\n');
+                result = result.replace(`__CODE_BLOCK_${index}__`, `[CODE]${cleanCode}[/CODE]`);
+            } else {
+                // 单行代码
+                result = result.replace(`__INLINE_CODE_${index}__`, code);
+            }
+        });
+    }
+    
+    // 7. 清理首尾空格
+    return result.trim();
+}
+
+/**
+ * 自定义模式处理文本
+ * @param {string} text - 需要处理的文本
+ * @param {Object} config - 自定义配置
+ * @returns {string} 处理后的文本
+ */
+function customProcessText(text, config = {}) {
+    const {
+        paragraphSeparator = '[PARA]',
+        listSeparator = '[LIST]'
+    } = config;
+    
+    return smartProcessText(text, {
+        paragraphSeparator,
+        listSeparator,
+        preserveCode: true
+    });
+}
+
+/**
+ * 根据模式处理文本
+ * @param {string} text - 输入文本
+ * @param {string} mode - 处理模式：'simple', 'smart', 'custom'
+ * @param {Object} config - 配置参数
+ * @returns {string} 处理后的文本
+ */
+function processTextByMode(text, mode = 'simple', config = {}) {
+    switch (mode) {
+        case 'smart':
+            return smartProcessText(text, config);
+        case 'custom':
+            return customProcessText(text, config);
+        case 'simple':
+        default:
+            return removeLineBreaks(text);
+    }
+}
+
+/**
  * 输入验证函数
  * @param {string} text - 需要验证的文本
  * @returns {Object} 验证结果 { isValid: boolean, message: string }
@@ -253,6 +369,9 @@ function getTextStats(text) {
 // 导出到全局作用域（用于在其他脚本中使用）
 window.TextUtils = {
     removeLineBreaks,
+    smartProcessText,
+    customProcessText, 
+    processTextByMode,
     validateInput,
     copyToClipboard,
     showToast,

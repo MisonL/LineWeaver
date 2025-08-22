@@ -41,7 +41,56 @@ function initializeApp() {
     // 初始化状态
     updateUIState();
     
-    console.log('文本换行符去除工具已初始化');
+    // 初始化模式选择器
+    initializeModeSelector();
+    
+    console.log('LineWeaver 已初始化');
+}
+
+/**
+ * 初始化模式选择器
+ */
+function initializeModeSelector() {
+    const modeRadios = document.querySelectorAll('input[name="processMode"]');
+    const customConfig = document.getElementById('customConfig');
+    
+    modeRadios.forEach(radio => {
+        radio.addEventListener('change', handleModeChange);
+    });
+    
+    // 初始化显示状态
+    handleModeChange();
+}
+
+/**
+ * 处理模式变更
+ */
+function handleModeChange() {
+    const selectedMode = document.querySelector('input[name="processMode"]:checked')?.value;
+    const customConfig = document.getElementById('customConfig');
+    
+    if (customConfig) {
+        customConfig.style.display = selectedMode === 'custom' ? 'block' : 'none';
+    }
+    
+    // 更新按钮文本
+    updateConvertButtonText(selectedMode);
+}
+
+/**
+ * 更新转换按钮文本
+ */
+function updateConvertButtonText(mode) {
+    const convertBtnText = Elements.convertBtnText;
+    if (!convertBtnText) return;
+    
+    const modeTexts = {
+        'simple': '🔄 简单转换',
+        'smart': '🧠 智能转换',
+        'custom': '🎨 自定义转换'
+    };
+    
+    convertBtnText.textContent = modeTexts[mode] || '转换文本';
 }
 
 /**
@@ -123,8 +172,12 @@ async function handleConvert() {
         // 模拟异步处理（对于大文本）
         await new Promise(resolve => setTimeout(resolve, 100));
         
+        // 获取处理模式和配置
+        const mode = document.querySelector('input[name="processMode"]:checked')?.value || 'simple';
+        const config = getProcessingConfig(mode);
+        
         // 执行文本处理
-        const processedText = TextUtils.removeLineBreaks(inputText);
+        const processedText = TextUtils.processTextByMode(inputText, mode, config);
         
         // 更新输出
         if (Elements.outputText) {
@@ -141,7 +194,12 @@ async function handleConvert() {
         // 显示成功消息
         const stats = TextUtils.getTextStats(inputText);
         const processedStats = TextUtils.getTextStats(processedText);
-        const message = `转换完成！原文本 ${stats.lines} 行，转换后 ${processedStats.lines} 行`;
+        const modeNames = {
+            'simple': '简单模式',
+            'smart': '智能模式', 
+            'custom': '自定义模式'
+        };
+        const message = `${modeNames[mode]}转换完成！原文本 ${stats.lines} 行，转换后 ${processedStats.lines} 行`;
         TextUtils.showToast(message, 'success');
         
         // 自动聚焦到输出区域
@@ -156,6 +214,20 @@ async function handleConvert() {
     } finally {
         setProcessingState(false);
     }
+}
+
+/**
+ * 获取处理配置
+ */
+function getProcessingConfig(mode) {
+    if (mode === 'custom') {
+        return {
+            paragraphSeparator: document.getElementById('paragraphSeparator')?.value || '[PARA]',
+            listSeparator: document.getElementById('listSeparator')?.value || '[LIST]'
+        };
+    }
+    
+    return {}; // 使用默认配置
 }
 
 /**

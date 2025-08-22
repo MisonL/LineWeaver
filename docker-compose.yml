@@ -2,15 +2,15 @@
 # 简化容器管理和部署流程
 
 # 项目名称
-name: text-line-remover
+name: lineweaver
 
 services:
   # 主应用服务
-  text-line-remover:
+  lineweaver:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: text-line-remover-app
+    container_name: lineweaver-app
     restart: unless-stopped
     ports:
       - "8090:80"
@@ -21,7 +21,7 @@ services:
       - NGINX_HOST=localhost
       - NGINX_PORT=80
     labels:
-      - "com.docker.compose.project=text-line-remover"
+      - "com.docker.compose.project=lineweaver"
       - "description=文本换行符去除工具"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
@@ -30,12 +30,12 @@ services:
       retries: 3
       start_period: 40s
     networks:
-      - text-line-remover-network
+      - lineweaver-network
 
   # Nginx 反向代理（可选，用于生产环境）
   nginx-proxy:
     image: nginx:1.25-alpine
-    container_name: text-line-remover-proxy
+    container_name: lineweaver-proxy
     restart: unless-stopped
     ports:
       - "80:80"
@@ -45,20 +45,20 @@ services:
       - ./ssl:/etc/nginx/ssl:ro  # SSL证书目录（如需HTTPS）
       - ./logs/proxy:/var/log/nginx
     depends_on:
-      - text-line-remover
+      - lineweaver
     environment:
-      - UPSTREAM_SERVER=text-line-remover:80
+      - UPSTREAM_SERVER=lineweaver:80
     networks:
-      - text-line-remover-network
+      - lineweaver-network
     # 默认禁用代理服务，根据需要启用
     profiles:
       - production
 
 # 网络配置
 networks:
-  text-line-remover-network:
+  lineweaver-network:
     driver: bridge
-    name: text-line-remover-net
+    name: lineweaver-net
 
 # 卷配置
 volumes:

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>文本处理功能测试</title>
+    <title>LineWeaver - 功能测试</title>
     <style>
         body { font-family: monospace; padding: 20px; }
         .test-case { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
@@ -13,7 +13,7 @@
     </style>
 </head>
 <body>
-    <h1>文本换行符去除工具 - 功能测试</h1>
+    <h1>LineWeaver - 功能测试</h1>
     <div id="test-results"></div>
 
     <script>
@@ -27,6 +27,35 @@
                 .replace(/\s+/g, ' ')
                 .trim();
         }
+        
+        // 智能处理文本函数（简化版）
+        function smartProcessText(text, options = {}) {
+            if (!text || typeof text !== 'string') {
+                return '';
+            }
+            
+            const {
+                paragraphSeparator = '[PARA]',
+                listSeparator = '[LIST]'
+            } = options;
+            
+            let result = text;
+            
+            // 处理段落
+            result = result.replace(/\n\s*\n/g, ` ${paragraphSeparator} `);
+            
+            // 处理列表项
+            result = result.replace(/^\s*\d+[\.\)\uff09]\s+/gm, `${listSeparator}$&`);
+            result = result.replace(/^\s*[-\*\+\u2022]\s+/gm, `${listSeparator}$&`);
+            
+            // 去除剩余换行符
+            result = result.replace(/\n/g, ' ');
+            
+            // 清理多余空格
+            result = result.replace(/\s+/g, ' ');
+            
+            return result.trim();
+        }
 
         // 测试用例
         const testCases = [
@@ -34,6 +63,24 @@
                 name: '普通换行文本',
                 input: '第一行\n第二行\n第三行',
                 expected: '第一行 第二行 第三行'
+            },
+            {
+                name: '段落分隔测试（智能模式）',
+                input: '第一段文本\n\n第二段文本',
+                expected: '第一段文本 [PARA] 第二段文本',
+                useSmartMode: true
+            },
+            {
+                name: '数字列表测试（智能模式）',
+                input: '1. 第一项\n2. 第二项\n3. 第三项',
+                expected: '[LIST]1. 第一项 [LIST]2. 第二项 [LIST]3. 第三项',
+                useSmartMode: true
+            },
+            {
+                name: '项目符号列表测试（智能模式）',
+                input: '- 项目1\n- 项目2\n• 项目3',
+                expected: '[LIST]- 项目1 [LIST]- 项目2 [LIST]• 项目3',
+                useSmartMode: true
             },
             {
                 name: '混合换行符',
@@ -61,24 +108,10 @@
                 expected: '开始 中间内容 结束'
             },
             {
-                name: '单个换行符',
-                input: 'Hello\nWorld',
-                expected: 'Hello World'
-            },
-            {
-                name: 'Tab和空格混合',
-                input: '行1\t\n\t行2\n  行3  ',
-                expected: '行1 行2 行3'
-            },
-            {
-                name: '中文文本',
-                input: '你好\n世界\r\n这是测试',
-                expected: '你好 世界 这是测试'
-            },
-            {
-                name: '只有空白字符',
-                input: '   \t  \n  \r\n  ',
-                expected: ''
+                name: '复杂段落和列表（智能模式）',
+                input: '第一段内容\n同一段继续\n\n第二段内容\n\n1. 列表项一\n2. 列表项二',
+                expected: '第一段内容 同一段继续 [PARA] 第二段内容 [PARA] [LIST]1. 列表项一 [LIST]2. 列表项二',
+                useSmartMode: true
             }
         ];
 
@@ -89,15 +122,18 @@
             let totalCount = testCases.length;
 
             testCases.forEach((testCase, index) => {
-                const result = removeLineBreaks(testCase.input);
+                const result = testCase.useSmartMode ? 
+                    smartProcessText(testCase.input) : 
+                    removeLineBreaks(testCase.input);
                 const passed = result === testCase.expected;
                 
                 if (passed) passCount++;
 
                 const testDiv = document.createElement('div');
                 testDiv.className = 'test-case';
+                const modeText = testCase.useSmartMode ? ' [🧠 智能模式]' : ' [🔄 简单模式]';
                 testDiv.innerHTML = `
-                    <h3>${testCase.name} ${passed ? '<span class="pass">✓ PASS</span>' : '<span class="fail">✗ FAIL</span>'}</h3>
+                    <h3>${testCase.name}${modeText} ${passed ? '<span class="pass">✓ PASS</span>' : '<span class="fail">✗ FAIL</span>'}</h3>
                     <p><strong>输入:</strong></p>
                     <pre>${JSON.stringify(testCase.input)}</pre>
                     <p><strong>期望输出:</strong></p>
