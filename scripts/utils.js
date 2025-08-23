@@ -63,6 +63,9 @@ function smartProcessText(text, options = {}) {
     }
     
     // 2. 处理Markdown标题和特殊元素
+    // 定义tableRows数组，确保它在任何情况下都存在
+    const tableRows = [];
+    
     if (detectMarkdown) {
         // 保护Markdown标题
         result = result.replace(/^(#{1,6})\s+(.+)$/gm, (match, hashes, content) => {
@@ -75,7 +78,6 @@ function smartProcessText(text, options = {}) {
         });
         
         // 保护Markdown表格
-        const tableRows = [];
         result = result.replace(/^\|(.+)\|\s*$/gm, (match) => {
             const placeholder = `__TABLE_ROW_${tableRows.length}__`;
             tableRows.push(match);

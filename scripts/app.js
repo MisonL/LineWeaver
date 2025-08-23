@@ -142,12 +142,6 @@ function bindEventListeners() {
         pasteBtn.addEventListener('click', handlePasteFromClipboard);
     }
     
-    // 重试按钮点击事件
-    const retryBtn = document.getElementById('retryBtn');
-    if (retryBtn) {
-        retryBtn.addEventListener('click', clearAll);
-    }
-    
     // 输入框变化事件（使用防抖优化性能）
     if (Elements.inputText) {
         const debouncedInputHandler = TextUtils.debounce(handleInputChange, 300);
@@ -195,15 +189,15 @@ async function handleConvert() {
         const mode = document.querySelector('input[name="processMode"]:checked')?.value || 'simple';
         const config = getProcessingConfig(mode);
         
-        // 检查输入文本是否含有错误信息
-        if (inputText.includes('Error on line') || inputText.includes('Parsing [Files]') || inputText.includes('ERROR:')) {
-            // 清理错误信息，提示用户
-            TextUtils.showToast('检测到输入文本包含错误信息，请清空后重新输入', 'warning');
+        // 执行文本处理
+        let processedText;
+        try {
+            processedText = TextUtils.processTextByMode(inputText, mode, config);
+        } catch (processingError) {
+            console.error('文本处理错误:', processingError);
+            TextUtils.showToast(`处理文本时出现错误: ${processingError.message || '未知错误'}，请重试`, 'error');
             return;
         }
-        
-        // 执行文本处理
-        const processedText = TextUtils.processTextByMode(inputText, mode, config);
         
         // 检查处理后的文本是否为空
         if (!processedText) {
@@ -219,6 +213,9 @@ async function handleConvert() {
         // 更新应用状态
         AppState.inputText = inputText;
         AppState.outputText = processedText;
+        
+        // 隐藏错误提示
+        hideErrorAlert();
         
         // 更新文本统计
         updateTextStats(inputText, processedText);
@@ -492,6 +489,9 @@ function handleInputChange(event) {
         textStats.style.display = 'none';
     }
     
+    // 移除错误检测逻辑，始终隐藏错误提示
+    hideErrorAlert();
+    
     // 更新UI状态
     updateUIState();
 }
@@ -655,38 +655,79 @@ function updateUIState() {
 }
 
 /**
+ * 检查文本是否包含错误信息
+ * @param {string} text - 要检查的文本
+ * @returns {boolean} 是否包含错误信息
+ */
+function hasErrorText(text) {
+    if (!text) return false;
+    
+    // 常见的错误信息模式
+    const errorPatterns = [
+        /Error on line \d+/i,
+        /Parsing \[Files\]/i,
+        /ERROR:/i,
+        /错误:/i,
+        /exception/i,
+        /failed/i,
+        /invalid/i
+    ];
+    
+    return errorPatterns.some(pattern => pattern.test(text));
+}
+
+/**
+ * 显示错误提示
+ */
+function showErrorAlert() {
+    const errorAlert = document.getElementById('errorAlert');
+    if (errorAlert) {
+        errorAlert.classList.add('show');
+    }
+}
+
+/**
+ * 隐藏错误提示
+ * 保留此函数以避免其他部分代码调用时出错
+ */
+function hideErrorAlert() {
+    // 已移除错误提示元素，此函数仅保留以兼容现有代码
+}
+
+/**
  * 清空所有内容
  */
 function clearAll() {
-    try {
-        if (Elements.inputText) {
-            Elements.inputText.value = '';
-        }
-        if (Elements.outputText) {
-            Elements.outputText.value = '';
-        }
-        
-        AppState.inputText = '';
-        AppState.outputText = '';
-        
-        // 隐藏文本统计
-        const textStats = document.getElementById('textStats');
-        if (textStats) {
-            textStats.style.display = 'none';
-        }
-        
-        updateUIState();
-        
-        // 聚焦到输入框
-        if (Elements.inputText) {
-            Elements.inputText.focus();
-        }
-        
-        TextUtils.showToast('已清空所有内容', 'info');
-    } catch (error) {
-        console.error('清空内容出错:', error);
-        TextUtils.showToast('清空内容时出错，请刷新页面重试', 'error');
+    // 清空输入框
+    if (Elements.inputText) {
+        Elements.inputText.value = '';
     }
+    
+    // 清空输出框
+    if (Elements.outputText) {
+        Elements.outputText.value = '';
+    }
+    
+    // 重置应用状态
+    AppState.inputText = '';
+    AppState.outputText = '';
+    
+    // 隐藏统计信息
+    const textStats = document.getElementById('textStats');
+    if (textStats) {
+        textStats.style.display = 'none';
+    }
+    
+    // 更新UI状态
+    updateUIState();
+    
+    // 聚焦到输入框
+    if (Elements.inputText) {
+        Elements.inputText.focus();
+    }
+    
+    // 显示提示信息
+    TextUtils.showToast('已清空所有内容', 'info');
 }
 
 /**
