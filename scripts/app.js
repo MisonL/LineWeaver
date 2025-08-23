@@ -101,6 +101,7 @@ function cacheElements() {
     Elements.outputText = document.getElementById('outputText');
     Elements.convertBtn = document.getElementById('convertBtn');
     Elements.copyBtn = document.getElementById('copyBtn');
+    Elements.pasteBtn = document.getElementById('pasteBtn');
     Elements.convertBtnText = Elements.convertBtn?.querySelector('.btn-text');
     Elements.convertBtnLoading = Elements.convertBtn?.querySelector('.btn-loading');
     Elements.copyBtnText = Elements.copyBtn?.querySelector('.btn-text');
@@ -133,6 +134,12 @@ function bindEventListeners() {
     const exampleBtn = document.getElementById('exampleBtn');
     if (exampleBtn) {
         exampleBtn.addEventListener('click', handleLoadExample);
+    }
+    
+    // 粘贴按钮点击事件
+    const pasteBtn = document.getElementById('pasteBtn');
+    if (pasteBtn) {
+        pasteBtn.addEventListener('click', handlePasteFromClipboard);
     }
     
     // 输入框变化事件（使用防抖优化性能）
@@ -226,6 +233,63 @@ async function handleConvert() {
 }
 
 /**
+ * 处理从剪贴板粘贴按钮点击
+ */
+async function handlePasteFromClipboard() {
+    try {
+        // 尝试使用现代剪贴板API获取文本
+        if (navigator.clipboard && navigator.clipboard.readText) {
+            // 首先清空输入文本框
+            if (Elements.inputText) {
+                Elements.inputText.value = '';
+            }
+            
+            // 设置加载状态
+            TextUtils.showToast('正在从剪贴板读取内容...', 'info');
+            
+            // 从剪贴板获取文本
+            const clipboardText = await navigator.clipboard.readText();
+            
+            // 将文本放入输入框
+            if (Elements.inputText) {
+                Elements.inputText.value = clipboardText;
+                Elements.inputText.focus();
+                
+                // 触发输入变化事件
+                const event = new Event('input', { bubbles: true });
+                Elements.inputText.dispatchEvent(event);
+                
+                TextUtils.showToast('已粘贴剪贴板内容', 'success');
+            }
+        } else {
+            // 退化方案：提示用户手动粘贴
+            TextUtils.showToast('您的浏览器不支持自动读取剪贴板，请手动粘贴', 'warning');
+            
+            // 清空并聚焦到输入框
+            if (Elements.inputText) {
+                Elements.inputText.value = '';
+                Elements.inputText.focus();
+            }
+        }
+    } catch (error) {
+        console.error('读取剪贴板失败:', error);
+        
+        // 可能是权限问题或非HTTPS环境
+        if (error.name === 'NotAllowedError' || error.name === 'SecurityError') {
+            TextUtils.showToast('无法访问剪贴板。请确保在HTTPS环境下使用或手动粘贴内容。', 'error');
+        } else {
+            TextUtils.showToast('读取剪贴板内容时出错，请手动粘贴', 'error');
+        }
+        
+        // 清空并聚焦到输入框
+        if (Elements.inputText) {
+            Elements.inputText.value = '';
+            Elements.inputText.focus();
+        }
+    }
+}
+
+/**
  * 处理加载示例按钮点击
  */
 function handleLoadExample() {
@@ -274,7 +338,40 @@ function handleLoadExample() {
 ### 高级功能
 - 多模式支持
 - 自定义配置
-- 实时统计`
+- 实时统计`,
+        
+        // Markdown示例
+        `# Markdown 格式示例
+
+## 这是二级标题
+
+这是一段普通文本，包含 *斜体* 和 **粗体** 内容。
+
+### 列表示例
+
+* 无序列表项 1
+* 无序列表项 2
+  * 嵌套项目
+  * 另一个嵌套项目
+
+1. 有序列表项 1
+2. 有序列表项 2
+
+### 引用文本
+
+> 这是一段引用文本
+> 可以有多行
+
+### 表格
+
+| 名称 | 年龄 | 职业 |
+|---------|------|--------|
+| 张三 | 25   | 开发者 |
+| 李四 | 30   | 设计师 |
+
+---
+
+[这是一个链接](https://example.com)`
     ];
     
     const randomExample = examples[Math.floor(Math.random() * examples.length)];
@@ -424,6 +521,13 @@ function handleKeyboardShortcuts(event) {
         if (AppState.outputText) {
             handleCopy();
         }
+        return;
+    }
+    
+    // Ctrl/Cmd + V: 清空并粘贴
+    if ((event.ctrlKey || event.metaKey) && event.key === 'v' && event.target !== Elements.inputText && event.target !== Elements.outputText) {
+        event.preventDefault();
+        handlePasteFromClipboard();
         return;
     }
     

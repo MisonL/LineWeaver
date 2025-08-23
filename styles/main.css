@@ -66,6 +66,7 @@ body {
     text-align: center;
     flex-shrink: 0;
     box-shadow: var(--shadow-sm);
+    position: relative; /* 添加相对定位，作为 GitHub 图标的参考点 */
 }
 
 .app-title {
@@ -84,6 +85,39 @@ body {
     max-width: 640px;
     margin-left: auto;
     margin-right: auto;
+}
+
+/* GitHub 链接和图标样式 */
+.github-link {
+    position: absolute;
+    top: calc(var(--spacing) * 3);
+    right: calc(var(--spacing) * 4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--gray-50);
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.github-link:hover {
+    background: var(--gray-200);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.github-icon {
+    width: 24px;
+    height: 24px;
+    fill: var(--gray-700);
+    transition: fill 0.2s ease;
+}
+
+.github-link:hover .github-icon {
+    fill: var(--primary-color);
 }
 
 /* 主工作区 - 现代卡片式分屏布局 */
@@ -128,6 +162,13 @@ body {
     font-weight: 600;
     color: var(--text-primary);
     margin: 0;
+}
+
+/* 面板操作按钮组 */
+.panel-actions {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--spacing) * 1.5);
 }
 
 /* 模式选择器 */
@@ -255,7 +296,8 @@ body {
 /* 按钮样式 */
 .convert-btn,
 .copy-btn,
-.example-btn {
+.example-btn,
+.paste-btn {
     margin: 0 calc(var(--spacing) * 4) calc(var(--spacing) * 4);
     padding: calc(var(--spacing) * 2.5) calc(var(--spacing) * 4);
     border: 1px solid transparent;
@@ -314,6 +356,23 @@ body {
     background: var(--surface);
     color: var(--primary-color);
     border-color: var(--primary-color);
+    box-shadow: var(--shadow-sm);
+}
+
+.paste-btn {
+    background: var(--primary-light);
+    color: var(--primary-color);
+    border-color: transparent;
+    font-size: 0.8125rem;
+    padding: calc(var(--spacing) * 1.5) calc(var(--spacing) * 2.5);
+    margin: 0;
+    font-weight: 500;
+    border-radius: var(--radius);
+}
+
+.paste-btn:hover {
+    background: var(--primary-color);
+    color: white;
     box-shadow: var(--shadow-sm);
 }
 
@@ -418,4 +477,30 @@ body {
     font-size: 0.8125rem;
     color: var(--text-secondary);
     flex-shrink: 0;
+}
+
+.footer-info {
+    display: flex;
+    justify-content: center;
+    gap: calc(var(--spacing) * 3);
+    margin-top: calc(var(--spacing) * 1);
+    font-size: 0.75rem;
+}
+
+.footer-item {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(var(--spacing) * 0.5);
+}
+
+.footer-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.footer-link:hover {
+    text-decoration: underline;
+    color: var(--primary-hover);
 }

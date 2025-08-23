@@ -35,7 +35,8 @@ function smartProcessText(text, options = {}) {
     const {
         paragraphSeparator = '[PARA]',
         listSeparator = '[LIST]',
-        preserveCode = true
+        preserveCode = true,
+        detectMarkdown = true // 新增：Markdown 检测选项
     } = options;
     
     // 特殊字符转义函数
@@ -61,10 +62,41 @@ function smartProcessText(text, options = {}) {
         });
     }
     
-    // 2. 处理段落（空行分隔）
+    // 2. 处理Markdown标题和特殊元素
+    if (detectMarkdown) {
+        // 保护Markdown标题
+        result = result.replace(/^(#{1,6})\s+(.+)$/gm, (match, hashes, content) => {
+            return `${paragraphSeparator}${match}`;
+        });
+        
+        // 保护Markdown水平线
+        result = result.replace(/^(\s*[-*_]){3,}\s*$/gm, (match) => {
+            return `${paragraphSeparator}${match}${paragraphSeparator}`;
+        });
+        
+        // 保护Markdown表格
+        const tableRows = [];
+        result = result.replace(/^\|(.+)\|\s*$/gm, (match) => {
+            const placeholder = `__TABLE_ROW_${tableRows.length}__`;
+            tableRows.push(match);
+            return placeholder;
+        });
+        
+        // 保护Markdown引用块
+        result = result.replace(/^\s*>\s+(.+)$/gm, (match, content) => {
+            return `${listSeparator}${match}`;
+        });
+        
+        // 处理Markdown链接和图片
+        result = result.replace(/!?\[([^\]]*)\]\(([^\)]*)\)/g, (match) => {
+            return match.replace(/\s+/g, ' ');
+        });
+    }
+    
+    // 3. 处理段落（空行分隔）
     result = result.replace(/\n\s*\n/g, ` ${paragraphSeparator} `);
     
-    // 3. 处理列表项（数字或项目符号开头）
+    // 4. 处理列表项（数字或项目符号开头）
     const listPatterns = [
         /^\s*\d+[\.\)\uff09]\s+/gm,  // 数字列表：1. 2) 3）
         /^\s*[-\*\+\u2022]\s+/gm,      // 项目符号列表：- * + •
@@ -75,13 +107,13 @@ function smartProcessText(text, options = {}) {
         result = result.replace(pattern, `${listSeparator}$&`);
     });
     
-    // 4. 去除剩余的换行符
+    // 5. 去除剩余的换行符
     result = result.replace(/\n/g, ' ');
     
-    // 5. 清理多余空格
+    // 6. 清理多余空格
     result = result.replace(/\s+/g, ' ');
     
-    // 6. 恢复代码块
+    // 7. 恢复代码块
     if (preserveCode && codeBlocks.length > 0) {
         codeBlocks.forEach((code, index) => {
             if (code.includes('```')) {
@@ -95,7 +127,14 @@ function smartProcessText(text, options = {}) {
         });
     }
     
-    // 7. 清理首尾空格
+    // 8. 恢复Markdown表格行
+    if (detectMarkdown && tableRows.length > 0) {
+        tableRows.forEach((row, index) => {
+            result = result.replace(`__TABLE_ROW_${index}__`, row);
+        });
+    }
+    
+    // 9. 清理首尾空格
     return result.trim();
 }
 
@@ -108,13 +147,15 @@ function smartProcessText(text, options = {}) {
 function customProcessText(text, config = {}) {
     const {
         paragraphSeparator = '[PARA]',
-        listSeparator = '[LIST]'
+        listSeparator = '[LIST]',
+        detectMarkdown = true
     } = config;
     
     return smartProcessText(text, {
         paragraphSeparator,
         listSeparator,
-        preserveCode: true
+        preserveCode: true,
+        detectMarkdown
     });
 }
 
