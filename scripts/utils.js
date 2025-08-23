@@ -411,6 +411,53 @@ function getTextStats(text) {
     };
 }
 
+/**
+ * 从剪贴板读取文本
+ * @returns {Promise<string>} 剪贴板文本
+ */
+async function readFromClipboard() {
+    // 先尝试现代Clipboard API
+    if (navigator.clipboard && navigator.clipboard.readText) {
+        try {
+            return await navigator.clipboard.readText();
+        } catch (err) {
+            console.warn('Modern clipboard read API failed:', err);
+        }
+    }
+    
+    // 如果现代API失败，使用降级方案
+    try {
+        // 创建一个隐藏的textarea
+        const textArea = document.createElement('textarea');
+        textArea.style.position = 'fixed';
+        textArea.style.top = '-9999px';
+        textArea.style.left = '-9999px';
+        textArea.style.opacity = '0';
+        document.body.appendChild(textArea);
+        
+        // 聚焦元素
+        textArea.focus();
+        
+        // 执行粘贴命令
+        const successful = document.execCommand('paste');
+        
+        // 获取粘贴的内容
+        const text = textArea.value;
+        
+        // 移除临时元素
+        document.body.removeChild(textArea);
+        
+        if (successful) {
+            return text;
+        }
+    } catch (err) {
+        console.error('Fallback clipboard read failed:', err);
+    }
+    
+    // 两种方式都失败时返回空字符串
+    return '';
+}
+
 // 导出到全局作用域（用于在其他脚本中使用）
 window.TextUtils = {
     removeLineBreaks,
@@ -419,6 +466,7 @@ window.TextUtils = {
     processTextByMode,
     validateInput,
     copyToClipboard,
+    readFromClipboard,
     showToast,
     debounce,
     throttle,

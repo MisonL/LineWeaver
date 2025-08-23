@@ -262,24 +262,40 @@ async function handleConvert() {
  * 处理从剪贴板粘贴按钮点击
  */
 async function handlePasteFromClipboard() {
-    // 直接调用清空并聚焦到输入框
-    if (Elements.inputText) {
-        // 清空输入框
-        Elements.inputText.value = '';
+    try {
+        if (Elements.inputText) {
+            // 清空输入框
+            Elements.inputText.value = '';
+            
+            // 显示加载中提示
+            TextUtils.showToast('正在从剪贴板获取内容...', 'info');
+            
+            // 使用实用函数获取剪贴板内容
+            const clipboardText = await TextUtils.readFromClipboard();
+            
+            if (clipboardText) {
+                // 设置到输入框
+                Elements.inputText.value = clipboardText;
+                Elements.inputText.focus();
+                
+                // 触发输入事件
+                const inputEvent = new Event('input', { bubbles: true });
+                Elements.inputText.dispatchEvent(inputEvent);
+                
+                TextUtils.showToast('已粘贴剪贴板内容', 'success');
+                return;
+            }
+            
+            // 如果无法获取剪贴板内容，提示用户手动粘贴
+            Elements.inputText.focus();
+            TextUtils.showToast('无法自动读取剪贴板，请手动粘贴 (Ctrl/Cmd+V)', 'warning', 4000);
+        }
+    } catch (error) {
+        console.error('尝试粘贴内容时出错:', error);
+        TextUtils.showToast('粘贴内容时出错，请手动粘贴', 'error');
         
-        // 聚焦到输入框
-        Elements.inputText.focus();
-        
-        // 显示提示给用户
-        TextUtils.showToast('请使用键盘快捷键（Ctrl/Cmd+V）粘贴文本', 'info', 4000);
-        
-        // 尝试触发系统粘贴事件（兼容性方法）
-        try {
-            // 模拟粘贴点击事件
-            document.execCommand('paste');
-        } catch (e) {
-            // 如果 execCommand 失败，已经有展示提示，所以这里不需要额外处理
-            console.log('浏览器不支持程序化粘贴操作');
+        if (Elements.inputText) {
+            Elements.inputText.focus();
         }
     }
 }
