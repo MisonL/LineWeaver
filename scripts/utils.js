@@ -352,12 +352,16 @@ function throttle(func, limit) {
  * @returns {Object} 浏览器功能支持信息
  */
 function detectBrowserCapabilities() {
+    const userAgent = navigator.userAgent;
+    const isSafari = /^((?!chrome|android).)*safari/i.test(userAgent);
+    
     return {
         clipboardAPI: !!(navigator.clipboard && navigator.clipboard.writeText),
         execCommand: document.queryCommandSupported && document.queryCommandSupported('copy'),
         isHttps: location.protocol === 'https:',
         isLocalhost: location.hostname === 'localhost' || location.hostname === '127.0.0.1',
-        userAgent: navigator.userAgent
+        userAgent: userAgent,
+        isSafari: isSafari
     };
 }
 

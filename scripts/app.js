@@ -142,6 +142,12 @@ function bindEventListeners() {
         pasteBtn.addEventListener('click', handlePasteFromClipboard);
     }
     
+    // 重试按钮点击事件
+    const retryBtn = document.getElementById('retryBtn');
+    if (retryBtn) {
+        retryBtn.addEventListener('click', clearAll);
+    }
+    
     // 输入框变化事件（使用防抖优化性能）
     if (Elements.inputText) {
         const debouncedInputHandler = TextUtils.debounce(handleInputChange, 300);
@@ -189,8 +195,21 @@ async function handleConvert() {
         const mode = document.querySelector('input[name="processMode"]:checked')?.value || 'simple';
         const config = getProcessingConfig(mode);
         
+        // 检查输入文本是否含有错误信息
+        if (inputText.includes('Error on line') || inputText.includes('Parsing [Files]') || inputText.includes('ERROR:')) {
+            // 清理错误信息，提示用户
+            TextUtils.showToast('检测到输入文本包含错误信息，请清空后重新输入', 'warning');
+            return;
+        }
+        
         // 执行文本处理
         const processedText = TextUtils.processTextByMode(inputText, mode, config);
+        
+        // 检查处理后的文本是否为空
+        if (!processedText) {
+            TextUtils.showToast('处理后的文本为空，请检查输入', 'warning');
+            return;
+        }
         
         // 更新输出
         if (Elements.outputText) {
@@ -226,7 +245,14 @@ async function handleConvert() {
         
     } catch (error) {
         console.error('文本处理出错:', error);
-        TextUtils.showToast('处理文本时出现错误，请重试', 'error');
+        TextUtils.showToast(`处理文本时出现错误: ${error.message || '未知错误'}，请重试`, 'error');
+        
+        // 清空输出框，避免显示错误结果
+        if (Elements.outputText) {
+            Elements.outputText.value = '';
+        }
+        AppState.outputText = '';
+        
     } finally {
         setProcessingState(false);
     }
@@ -236,55 +262,24 @@ async function handleConvert() {
  * 处理从剪贴板粘贴按钮点击
  */
 async function handlePasteFromClipboard() {
-    try {
-        // 尝试使用现代剪贴板API获取文本
-        if (navigator.clipboard && navigator.clipboard.readText) {
-            // 首先清空输入文本框
-            if (Elements.inputText) {
-                Elements.inputText.value = '';
-            }
-            
-            // 设置加载状态
-            TextUtils.showToast('正在从剪贴板读取内容...', 'info');
-            
-            // 从剪贴板获取文本
-            const clipboardText = await navigator.clipboard.readText();
-            
-            // 将文本放入输入框
-            if (Elements.inputText) {
-                Elements.inputText.value = clipboardText;
-                Elements.inputText.focus();
-                
-                // 触发输入变化事件
-                const event = new Event('input', { bubbles: true });
-                Elements.inputText.dispatchEvent(event);
-                
-                TextUtils.showToast('已粘贴剪贴板内容', 'success');
-            }
-        } else {
-            // 退化方案：提示用户手动粘贴
-            TextUtils.showToast('您的浏览器不支持自动读取剪贴板，请手动粘贴', 'warning');
-            
-            // 清空并聚焦到输入框
-            if (Elements.inputText) {
-                Elements.inputText.value = '';
-                Elements.inputText.focus();
-            }
-        }
-    } catch (error) {
-        console.error('读取剪贴板失败:', error);
+    // 直接调用清空并聚焦到输入框
+    if (Elements.inputText) {
+        // 清空输入框
+        Elements.inputText.value = '';
         
-        // 可能是权限问题或非HTTPS环境
-        if (error.name === 'NotAllowedError' || error.name === 'SecurityError') {
-            TextUtils.showToast('无法访问剪贴板。请确保在HTTPS环境下使用或手动粘贴内容。', 'error');
-        } else {
-            TextUtils.showToast('读取剪贴板内容时出错，请手动粘贴', 'error');
-        }
+        // 聚焦到输入框
+        Elements.inputText.focus();
         
-        // 清空并聚焦到输入框
-        if (Elements.inputText) {
-            Elements.inputText.value = '';
-            Elements.inputText.focus();
+        // 显示提示给用户
+        TextUtils.showToast('请使用键盘快捷键（Ctrl/Cmd+V）粘贴文本', 'info', 4000);
+        
+        // 尝试触发系统粘贴事件（兼容性方法）
+        try {
+            // 模拟粘贴点击事件
+            document.execCommand('paste');
+        } catch (e) {
+            // 如果 execCommand 失败，已经有展示提示，所以这里不需要额外处理
+            console.log('浏览器不支持程序化粘贴操作');
         }
     }
 }
@@ -524,11 +519,14 @@ function handleKeyboardShortcuts(event) {
         return;
     }
     
-    // Ctrl/Cmd + V: 清空并粘贴
+    // Ctrl/Cmd + V: 当非输入区域收到粘贴快捷键时，聚焦到输入框
     if ((event.ctrlKey || event.metaKey) && event.key === 'v' && event.target !== Elements.inputText && event.target !== Elements.outputText) {
-        event.preventDefault();
-        handlePasteFromClipboard();
-        return;
+        // 只聚焦到输入框，不防止默认粘贴行为
+        if (Elements.inputText) {
+            // 清空输入框
+            Elements.inputText.value = '';
+            Elements.inputText.focus();
+        }
     }
     
     // Escape: 清空内容
@@ -644,24 +642,35 @@ function updateUIState() {
  * 清空所有内容
  */
 function clearAll() {
-    if (Elements.inputText) {
-        Elements.inputText.value = '';
+    try {
+        if (Elements.inputText) {
+            Elements.inputText.value = '';
+        }
+        if (Elements.outputText) {
+            Elements.outputText.value = '';
+        }
+        
+        AppState.inputText = '';
+        AppState.outputText = '';
+        
+        // 隐藏文本统计
+        const textStats = document.getElementById('textStats');
+        if (textStats) {
+            textStats.style.display = 'none';
+        }
+        
+        updateUIState();
+        
+        // 聚焦到输入框
+        if (Elements.inputText) {
+            Elements.inputText.focus();
+        }
+        
+        TextUtils.showToast('已清空所有内容', 'info');
+    } catch (error) {
+        console.error('清空内容出错:', error);
+        TextUtils.showToast('清空内容时出错，请刷新页面重试', 'error');
     }
-    if (Elements.outputText) {
-        Elements.outputText.value = '';
-    }
-    
-    AppState.inputText = '';
-    AppState.outputText = '';
-    
-    updateUIState();
-    
-    // 聚焦到输入框
-    if (Elements.inputText) {
-        Elements.inputText.focus();
-    }
-    
-    TextUtils.showToast('已清空所有内容', 'info');
 }
 
 /**
@@ -673,11 +682,20 @@ function logBrowserCapabilities() {
         clipboardAPI: caps.clipboardAPI,
         execCommand: caps.execCommand,
         isHttps: caps.isHttps,
-        isLocalhost: caps.isLocalhost
+        isLocalhost: caps.isLocalhost,
+        isSafari: caps.isSafari
     });
     
     // 显示兼容性提示
-    if (!caps.clipboardAPI && !caps.execCommand) {
+    if (caps.isSafari) {
+        TextUtils.showToast('在Safari浏览器中，点击“清空并粘贴”按钮后请手动粘贴文本', 'info', 6000);
+        
+        // 更新粘贴按钮的提示文字
+        const pasteBtn = document.getElementById('pasteBtn');
+        if (pasteBtn) {
+            pasteBtn.title = '点击清空输入框并聚焦，然后使用键盘粘贴（Cmd+V）';
+        }
+    } else if (!caps.clipboardAPI && !caps.execCommand) {
         TextUtils.showToast('您的浏览器可能不支持自动复制功能', 'warning', 5000);
     } else if (!caps.isHttps && !caps.isLocalhost) {
         TextUtils.showToast('建议在HTTPS环境下使用以获得最佳体验', 'info', 4000);

@@ -120,6 +120,29 @@ body {
     fill: var(--primary-color);
 }
 
+/* 重试按钮样式 */
+.retry-btn {
+    position: absolute;
+    top: calc(var(--spacing) * 3);
+    right: calc(var(--spacing) * 12);
+    padding: calc(var(--spacing) * 1.5) calc(var(--spacing) * 2.5);
+    border-radius: var(--radius);
+    background: var(--error-color);
+    color: white;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.retry-btn:hover {
+    background: #b91c1c; /* 深色红 */
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
 /* 主工作区 - 现代卡片式分屏布局 */
 .app-main {
     display: flex;
