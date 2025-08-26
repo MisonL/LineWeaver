@@ -32,7 +32,6 @@ jobs:
           
           # 复制所有静态文件
           cp index.html _site/
-          cp test.html _site/
           
           # 复制资源目录
           cp -r styles/ _site/styles/
