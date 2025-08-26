@@ -102,6 +102,8 @@ function cacheElements() {
     Elements.convertBtn = document.getElementById('convertBtn');
     Elements.copyBtn = document.getElementById('copyBtn');
     Elements.pasteBtn = document.getElementById('pasteBtn');
+    Elements.urlInput = document.getElementById('urlInput');
+    Elements.fetchUrlBtn = document.getElementById('fetchUrlBtn');
     Elements.convertBtnText = Elements.convertBtn?.querySelector('.btn-text');
     Elements.convertBtnLoading = Elements.convertBtn?.querySelector('.btn-loading');
     Elements.copyBtnText = Elements.copyBtn?.querySelector('.btn-text');
@@ -140,6 +142,27 @@ function bindEventListeners() {
     const pasteBtn = document.getElementById('pasteBtn');
     if (pasteBtn) {
         pasteBtn.addEventListener('click', handlePasteFromClipboard);
+    }
+    
+    // 获取URL内容按钮点击事件
+    if (Elements.fetchUrlBtn) {
+        Elements.fetchUrlBtn.addEventListener('click', handleFetchUrl);
+    }
+    
+    // URL输入框回车事件
+    if (Elements.urlInput) {
+        Elements.urlInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                handleFetchUrl();
+            }
+        });
+    }
+    
+    // 清除错误按钮点击事件
+    const clearErrorBtn = document.getElementById('clearErrorBtn');
+    if (clearErrorBtn) {
+        clearErrorBtn.addEventListener('click', clearAll);
     }
     
     // 输入框变化事件（使用防抖优化性能）
@@ -267,9 +290,58 @@ async function handlePasteFromClipboard() {
             // 显示加载中提示
             TextUtils.showToast('正在从剪贴板获取内容...', 'info');
             
-            // 使用实用函数获取剪贴板内容
-            const clipboardText = await TextUtils.readFromClipboard();
+            // 检查是否运行在安全上下文中（HTTPS或localhost）
+            const isSecureContext = window.isSecureContext || 
+                                  location.protocol === 'https:' || 
+                                  location.hostname === 'localhost' || 
+                                  location.hostname === '127.0.0.1';
             
+            // 检测是否是Safari浏览器
+            const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+            
+            // 尝试请求剪贴板权限（仅在安全上下文中）
+            if (isSecureContext) {
+                await TextUtils.requestClipboardPermission();
+            }
+            
+            let clipboardText = '';
+            
+            // 尝试使用Clipboard API
+            if (navigator.clipboard && navigator.clipboard.readText) {
+                try {
+                    clipboardText = await navigator.clipboard.readText();
+                } catch (apiError) {
+                    console.warn('Clipboard API failed:', apiError);
+                    // 继续尝试其他方法
+                }
+            }
+            
+            // 如果通过API未能获取到文本，尝试通用方法
+            if (!clipboardText) {
+                clipboardText = await TextUtils.readFromClipboard();
+            }
+            
+            // 对于Safari浏览器特殊处理
+            if (!clipboardText && isSafari) {
+                // 聚焦到输入框
+                Elements.inputText.focus();
+                
+                // 直接触发粘贴事件
+                try {
+                    // 使用execCommand尝试粘贴
+                    const success = document.execCommand('paste');
+                    
+                    if (success) {
+                        // 给浏览器一点时间处理粘贴
+                        await new Promise(resolve => setTimeout(resolve, 50));
+                        clipboardText = Elements.inputText.value;
+                    }
+                } catch (execError) {
+                    console.warn('Safari execCommand paste failed:', execError);
+                }
+            }
+            
+            // 处理获取到的文本
             if (clipboardText) {
                 // 设置到输入框
                 Elements.inputText.value = clipboardText;
@@ -283,13 +355,19 @@ async function handlePasteFromClipboard() {
                 return;
             }
             
-            // 如果无法获取剪贴板内容，提示用户手动粘贴
+            // 针对Safari浏览器的特殊提示
+            if (isSafari) {
+                TextUtils.showToast('在Safari浏览器中，您可能需要允许网站访问剪贴板。请手动粘贴 (Cmd+V)', 'warning', 5000);
+            } else {
+                TextUtils.showToast('无法自动读取剪贴板，请手动粘贴 (Ctrl/Cmd+V)', 'warning', 5000);
+            }
+            
+            // 聚焦到输入框便于手动粘贴
             Elements.inputText.focus();
-            TextUtils.showToast('无法自动读取剪贴板，请手动粘贴 (Ctrl/Cmd+V)', 'warning', 4000);
         }
     } catch (error) {
         console.error('尝试粘贴内容时出错:', error);
-        TextUtils.showToast('粘贴内容时出错，请手动粘贴', 'error');
+        TextUtils.showToast('粘贴内容时出错，请手动粘贴 (Ctrl/Cmd+V)', 'error');
         
         if (Elements.inputText) {
             Elements.inputText.focus();
@@ -688,10 +766,12 @@ function showErrorAlert() {
 
 /**
  * 隐藏错误提示
- * 保留此函数以避免其他部分代码调用时出错
  */
 function hideErrorAlert() {
-    // 已移除错误提示元素，此函数仅保留以兼容现有代码
+    const errorAlert = document.getElementById('errorAlert');
+    if (errorAlert) {
+        errorAlert.classList.remove('show');
+    }
 }
 
 /**
@@ -728,6 +808,173 @@ function clearAll() {
     
     // 显示提示信息
     TextUtils.showToast('已清空所有内容', 'info');
+}
+
+/**
+ * 处理获取URL内容
+ */
+async function handleFetchUrl() {
+    if (!Elements.urlInput || !Elements.inputText) {
+        return;
+    }
+    
+    const url = Elements.urlInput.value.trim();
+    if (!url) {
+        TextUtils.showToast('请输入有效的网址', 'warning');
+        return;
+    }
+    
+    // 检查URL格式
+    if (!TextUtils.isValidUrl(url)) {
+        TextUtils.showToast('请输入有效的URL格式，包含http://或https://', 'warning');
+        return;
+    }
+    
+    // 检查是否试图获取GitHub Pages自身
+    const currentHost = window.location.hostname;
+    const targetUrl = new URL(url);
+    if (targetUrl.hostname === currentHost || 
+        (currentHost.includes('github.io') && targetUrl.hostname.includes('github.io'))) {
+        TextUtils.showToast('不能获取当前网站自身的内容，请输入其他网站地址', 'warning');
+        return;
+    }
+    
+    try {
+        // 禁用按钮，显示加载状态
+        if (Elements.fetchUrlBtn) {
+            Elements.fetchUrlBtn.disabled = true;
+            Elements.fetchUrlBtn.textContent = '正在获取...';
+        }
+        
+        // 获取网页内容（移除ITSM特殊处理）
+        try {
+            const content = await TextUtils.fetchWebContent(url);
+            
+            if (!content) {
+                throw new Error('获取到的内容为空');
+            }
+            
+            // 判断是否是HTML内容
+            const isHtml = content.includes('<html') || content.includes('<body') || content.includes('<div');
+            
+            if (isHtml) {
+                console.log('检测到HTML内容，转换为Markdown');
+                // 转换为Markdown格式（方便AI理解）
+                const markdown = TextUtils.htmlToMarkdown(content, url);
+                
+                if (!markdown || markdown.length < 50) {
+                    // 如果Markdown转换失败或内容太少，尝试使用基本的文本提取
+                    const fallbackText = extractTextFromHtml(content);
+                    if (!fallbackText || fallbackText.length < 50) {
+                        throw new Error('无法提取有效内容，可能需要登录或内容由JavaScript动态加载');
+                    }
+                    
+                    // 使用基本文本提取结果
+                    Elements.inputText.value = fallbackText;
+                    TextUtils.showToast('已获取网页内容（使用基础提取模式）', 'warning');
+                } else {
+                    // 清空输入框并填充提取的文本
+                    Elements.inputText.value = markdown;
+                    
+                    // 判断内容质量
+                    if (markdown.split('\n').length <= 5 && !markdown.includes('PARA') && markdown.length < 500) {
+                        TextUtils.showToast('已获取部分网页内容，但可能不完整。这可能是因为内容需要登录或由JavaScript动态加载', 'warning', 6000);
+                    } else {
+                        TextUtils.showToast('已获取网页内容并转换为Markdown格式', 'success');
+                    }
+                }
+            } else {
+                // 非HTML内容，可能是纯文本或JSON
+                console.log('非HTML内容，直接使用');
+                Elements.inputText.value = content;
+                TextUtils.showToast('已获取网页内容', 'success');
+            }
+        } catch (error) {
+            console.error('获取网页内容失败:', error);
+            throw error; // 重新抛出错误，让外层catch处理
+        }
+        
+        // 触发输入事件
+        const inputEvent = new Event('input', { bubbles: true });
+        Elements.inputText.dispatchEvent(inputEvent);
+        
+        // 自动聚焦到转换按钮
+        if (Elements.convertBtn) {
+            Elements.convertBtn.focus();
+        }
+        
+        // 清空URL输入框
+        Elements.urlInput.value = '';
+    } catch (error) {
+        console.error('获取URL内容失败:', error);
+        
+        // 提供更具体的错误消息
+        let errorMessage = '获取内容失败';
+        
+        if (error.message.includes('权限') || error.message.includes('登录')) {
+            errorMessage = '网站需要登录或授权才能访问完整内容';
+        } else if (error.message.includes('JavaScript') || error.message.includes('动态')) {
+            errorMessage = '内容可能由JavaScript动态加载，无法完全获取';
+        } else if (error.message.includes('CORS') || error.message.includes('跨域')) {
+            errorMessage = '网站设置了跨域限制，无法获取内容';
+        } else if (error.message.includes('代理') || error.message.includes('proxy')) {
+            errorMessage = '所有代理服务器都不可用，请稍后再试';
+        } else {
+            errorMessage = `${error.message || '未知错误'}，请确保URL格式正确且可访问`;
+        }
+        
+        TextUtils.showToast(`获取内容失败: ${errorMessage}`, 'error', 5000);
+    } finally {
+        // 恢复按钮状态
+        if (Elements.fetchUrlBtn) {
+            Elements.fetchUrlBtn.disabled = false;
+            Elements.fetchUrlBtn.textContent = '🔗 获取内容';
+        }
+    }
+}
+
+/**
+ * 从HTML中提取文本内容
+ * @param {string} html - HTML字符串
+ * @returns {string} 提取的文本内容
+ */
+function extractTextFromHtml(html) {
+    try {
+        // 创建DOM解析器
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+        // 移除脚本、样式和其他不需要的元素
+        const elementsToRemove = doc.querySelectorAll('script, style, iframe, noscript, svg, canvas, video, audio');
+        elementsToRemove.forEach(el => el.remove());
+        
+        // 尝试获取主要内容（优先级：article > main > body）
+        let mainContent = doc.querySelector('article') || 
+                        doc.querySelector('main') || 
+                        doc.querySelector('.content') || 
+                        doc.querySelector('.article') || 
+                        doc.querySelector('.main-content') ||
+                        doc.querySelector('#content') ||
+                        doc.querySelector('.post-content') ||
+                        doc.querySelector('.knowledge-content') || // 针对知识分享页面
+                        doc.querySelector('.knowledge-detail') ||  // 针对知识详情页面
+                        doc.body;
+        
+        // 提取并处理文本
+        let text = mainContent.textContent
+            .replace(/\s+/g, ' ')  // 合并空白字符
+            .trim();               // 去除首尾空白
+        
+        // 如果内容太长，只取前15000个字符
+        if (text.length > 15000) {
+            text = text.substring(0, 15000) + '... (内容已截断)';
+        }
+        
+        return text;
+    } catch (error) {
+        console.error('提取HTML内容出错:', error);
+        return '';
+    }
 }
 
 /**

@@ -418,23 +418,60 @@ function getTextStats(text) {
  * @returns {Promise<string>} 剪贴板文本
  */
 async function readFromClipboard() {
-    // 先尝试现代Clipboard API
-    if (navigator.clipboard && navigator.clipboard.readText) {
+    // 检查是否运行在安全上下文中（HTTPS或localhost）
+    const isSecureContext = window.isSecureContext || 
+                           location.protocol === 'https:' || 
+                           location.hostname === 'localhost' || 
+                           location.hostname === '127.0.0.1';
+    
+    // 检测是否支持Clipboard API
+    const hasClipboardAPI = navigator.clipboard && typeof navigator.clipboard.readText === 'function';
+    
+    // 在安全上下文中首先尝试现代Clipboard API
+    if (isSecureContext && hasClipboardAPI) {
         try {
             return await navigator.clipboard.readText();
         } catch (err) {
             console.warn('Modern clipboard read API failed:', err);
+            // 继续尝试其他方法
         }
     }
     
-    // 如果现代API失败，使用降级方案
+    // 检测是否是Safari浏览器
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    
+    // Safari浏览器特殊处理
+    if (isSafari) {
+        try {
+            // 创建一个可编辑的div元素
+            const editableDiv = document.createElement('div');
+            editableDiv.contentEditable = true;
+            editableDiv.style.cssText = 'position:fixed;top:0;left:0;opacity:0;height:1px;width:1px;overflow:hidden;';
+            document.body.appendChild(editableDiv);
+            
+            // 聚焦到可编辑元素
+            editableDiv.focus();
+            
+            // 尝试执行粘贴命令
+            const successful = document.execCommand('paste');
+            
+            // 获取粘贴的内容并清理
+            const text = editableDiv.innerText || editableDiv.textContent || '';
+            document.body.removeChild(editableDiv);
+            
+            if (successful && text) {
+                return text;
+            }
+        } catch (err) {
+            console.warn('Safari clipboard handling failed:', err);
+        }
+    }
+    
+    // 通用降级方案
     try {
         // 创建一个隐藏的textarea
         const textArea = document.createElement('textarea');
-        textArea.style.position = 'fixed';
-        textArea.style.top = '-9999px';
-        textArea.style.left = '-9999px';
-        textArea.style.opacity = '0';
+        textArea.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;';
         document.body.appendChild(textArea);
         
         // 聚焦元素
@@ -449,18 +486,462 @@ async function readFromClipboard() {
         // 移除临时元素
         document.body.removeChild(textArea);
         
-        if (successful) {
+        if (successful && text) {
             return text;
         }
     } catch (err) {
         console.error('Fallback clipboard read failed:', err);
     }
     
-    // 两种方式都失败时返回空字符串
+    // 所有方法都失败时返回空字符串
     return '';
 }
 
-// 导出到全局作用域（用于在其他脚本中使用）
+/**
+ * Safari浏览器剪贴板访问辅助函数
+ * @returns {Promise<string>} 剪贴板文本
+ */
+async function safariClipboardAccess() {
+    return new Promise((resolve) => {
+        try {
+            // 创建一个临时的可编辑元素
+            const editableDiv = document.createElement('div');
+            editableDiv.contentEditable = true;
+            editableDiv.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0.01;padding:0;overflow:hidden;';
+            document.body.appendChild(editableDiv);
+            
+            // 聚焦到可编辑元素
+            editableDiv.focus();
+            
+            // 尝试执行粘贴命令
+            let success = false;
+            
+            // 使用setTimeout给浏览器一点时间来聚焦
+            setTimeout(() => {
+                try {
+                    success = document.execCommand('paste');
+                } catch (e) {
+                    console.warn('execCommand paste failed', e);
+                }
+                
+                // 获取粘贴的内容
+                const text = editableDiv.innerText || editableDiv.textContent || '';
+                
+                // 清理
+                document.body.removeChild(editableDiv);
+                
+                // 返回结果
+                resolve(success && text ? text : '');
+            }, 50);
+        } catch (error) {
+            console.error('Safari clipboard access helper failed:', error);
+            resolve('');
+        }
+    });
+}
+
+/**
+ * 获取当前选中的文本
+ * @returns {string} 选中的文本
+ */
+function getSelectedText() {
+    if (window.getSelection) {
+        return window.getSelection().toString();
+    } else if (document.selection && document.selection.type !== "Control") {
+        return document.selection.createRange().text;
+    }
+    return '';
+}
+
+/**
+ * 检测URL是否有效
+ * @param {string} url - 要检查的URL
+ * @returns {boolean} 是否是有效URL
+ */
+function isValidUrl(url) {
+    try {
+        new URL(url);
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+
+/**
+ * 获取网页内容
+ * @param {string} url - 要获取的URL
+ * @returns {Promise<string>} 获取的内容
+ */
+async function fetchWebContent(url) {
+    // 使用公共代理服务而非付费API，确保GitHub Pages环境下可用
+    const proxies = [
+        'https://corsproxy.io/?',
+        'https://api.allorigins.win/raw?url=',
+        'https://api.codetabs.com/v1/proxy?quest=',
+        'https://cors-anywhere.herokuapp.com/',
+        'https://crossorigin.me/'
+    ];
+    
+    try {
+        if (!isValidUrl(url)) {
+            throw new Error('无效的URL格式');
+        }
+        
+        // 使用公共代理服务而非付费API，确保GitHub Pages环境下可用
+        
+        // 存储最后一个错误，以便在所有代理都失败时提供详细信息
+        let lastError = null;
+        let htmlContent = null;
+        
+        // 尝试所有代理
+        for (const proxy of proxies) {
+            try {
+                console.log(`尝试使用代理: ${proxy}`);
+                const response = await fetch(`${proxy}${encodeURIComponent(url)}`);
+                
+                if (response.ok) {
+                    htmlContent = await response.text();
+                    
+                    // 检查内容是否足够（至少1KB）
+                    if (htmlContent && htmlContent.length > 1000) {
+                        // 检查是否是SPA应用
+                        if (isLikelySPA(htmlContent)) {
+                            console.warn('检测到可能是SPA应用，内容可能需要JavaScript执行才能完全加载');
+                        }
+                        
+                        console.log(`成功使用代理 ${proxy} 获取内容`);
+                        return htmlContent;
+                    }
+                }
+            } catch (error) {
+                console.warn(`使用代理 ${proxy} 获取内容失败:`, error);
+                lastError = error;
+            }
+        }
+        
+        // 如果获取到了一些内容，但不完整，仍然返回
+        if (htmlContent) {
+            return htmlContent;
+        }
+        
+        // 如果所有代理都失败了，抛出最后一个错误
+        throw lastError || new Error('所有代理服务器都不可用');
+    } catch (error) {
+        console.error('获取网页内容失败:', error);
+        throw error;
+    }
+}
+
+/**
+ * 从HTML中提取Markdown内容
+ * @param {string} html - HTML内容
+ * @param {string} url - 原始URL（用于处理相对链接）
+ * @returns {string} 提取的Markdown内容
+ */
+function htmlToMarkdown(html, url = '') {
+    try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+        // 获取页面标题
+        const title = doc.title || '无标题页面';
+        let markdown = `# ${title}\n\n`;
+        
+        // 移除不需要的元素
+        const elementsToRemove = doc.querySelectorAll('script, style, iframe, noscript, svg');
+        elementsToRemove.forEach(el => el.remove());
+        
+        // 针对ITSM系统的特定处理
+        if (url.includes('itsm.qdama.cn') && url.includes('knowledgeShare')) {
+            // 尝试专门查找知识共享页面的内容
+            const knowledgeContent = doc.querySelector('.knowledge-content') || 
+                                    doc.querySelector('.knowledge-detail') ||
+                                    doc.querySelector('.knowledge-text') || 
+                                    doc.querySelector('.knowledge-body');
+            
+            if (knowledgeContent) {
+                console.log('找到ITSM知识内容元素');
+                // 提取并格式化ITSM知识内容
+                markdown += extractMarkdownFromElement(knowledgeContent, url);
+                return markdown;
+            }
+            
+            // 尝试查找有意义的文本内容的div
+            const contentDivs = Array.from(doc.querySelectorAll('div')).filter(div => {
+                const text = div.textContent.trim();
+                return text.length > 200 && !text.includes('script') && !div.querySelector('script');
+            });
+            
+            if (contentDivs.length > 0) {
+                // 选择内容最丰富的div
+                const richestDiv = contentDivs.sort((a, b) => 
+                    b.textContent.trim().length - a.textContent.trim().length
+                )[0];
+                
+                markdown += extractMarkdownFromElement(richestDiv, url);
+                return markdown;
+            }
+        }
+        
+        // 查找主要内容 - 增强选择器以更好地处理SPA应用
+        const contentSelectors = [
+            'article', 'main', '.content', '.article', '.main-content',
+            '#content', '.post-content', '.knowledge-content', '.knowledge-detail',
+            '.entry-content', '.post', '.blog-post', '.entry', '.markdown-body',
+            '[role="main"]', '#main-content'
+        ];
+        
+        let mainContent = null;
+        for (const selector of contentSelectors) {
+            const element = doc.querySelector(selector);
+            if (element && element.textContent.trim().length > 100) {
+                mainContent = element;
+                break;
+            }
+        }
+        
+        // 如果没有找到主要内容，使用body
+        if (!mainContent) {
+            mainContent = doc.body;
+        }
+        
+        // 提取Markdown内容
+        markdown += extractMarkdownFromElement(mainContent, url);
+        return markdown;
+    } catch (error) {
+        console.error('HTML转Markdown失败:', error);
+        return '';
+    }
+}
+
+/**
+ * 从DOM元素中提取Markdown内容
+ * @param {Element} element - DOM元素
+ * @param {string} baseUrl - 基础URL（用于处理相对链接）
+ * @returns {string} 提取的Markdown内容
+ */
+function extractMarkdownFromElement(element, baseUrl = '') {
+    if (!element) return '';
+    
+    // 创建一个深拷贝以避免修改原始DOM
+    const elementClone = element.cloneNode(true);
+    
+    // 处理标题
+    const headings = elementClone.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    headings.forEach(heading => {
+        const level = parseInt(heading.tagName.substring(1));
+        const prefix = '#'.repeat(level);
+        heading.textContent = `\n\n${prefix} ${heading.textContent.trim()}\n\n`;
+    });
+    
+    // 处理段落
+    const paragraphs = elementClone.querySelectorAll('p');
+    paragraphs.forEach(p => {
+        // 确保段落前后有空行
+        if (p.textContent.trim()) {
+            p.textContent = `${p.textContent.trim()}\n\n`;
+        }
+    });
+    
+    // 处理列表
+    const lists = elementClone.querySelectorAll('ul, ol');
+    lists.forEach(list => {
+        const items = list.querySelectorAll('li');
+        items.forEach(item => {
+            const prefix = list.tagName === 'OL' ? '1. ' : '- ';
+            item.textContent = `${prefix}${item.textContent.trim()}\n`;
+        });
+    });
+    
+    // 处理链接 - 转换相对链接为绝对链接
+    const links = elementClone.querySelectorAll('a');
+    links.forEach(link => {
+        const text = link.textContent.trim();
+        let href = link.getAttribute('href');
+        
+        // 转换相对链接为绝对链接
+        if (href && !href.startsWith('http') && baseUrl) {
+            try {
+                href = new URL(href, baseUrl).href;
+            } catch (e) {
+                // 如果转换失败，保持原样
+            }
+        }
+        
+        if (text && href) {
+            link.textContent = `[${text}](${href})`;
+        }
+    });
+    
+    // 处理图片 - 转换相对链接为绝对链接
+    const images = elementClone.querySelectorAll('img');
+    images.forEach(img => {
+        const alt = img.getAttribute('alt') || 'image';
+        let src = img.getAttribute('src');
+        
+        // 转换相对链接为绝对链接
+        if (src && !src.startsWith('http') && baseUrl) {
+            try {
+                src = new URL(src, baseUrl).href;
+            } catch (e) {
+                // 如果转换失败，保持原样
+            }
+        }
+        
+        if (src) {
+            img.textContent = `![${alt}](${src})`;
+        }
+    });
+    
+    // 处理表格
+    const tables = elementClone.querySelectorAll('table');
+    tables.forEach(table => {
+        const rows = table.querySelectorAll('tr');
+        const markdownTable = [];
+        
+        rows.forEach((row, rowIndex) => {
+            const cells = row.querySelectorAll('th, td');
+            const markdownRow = [];
+            
+            cells.forEach(cell => {
+                markdownRow.push(cell.textContent.trim());
+            });
+            
+            markdownTable.push(`| ${markdownRow.join(' | ')} |`);
+            
+            // 如果是表头行，添加分隔行
+            if (rowIndex === 0) {
+                markdownTable.push(`| ${markdownRow.map(() => '---').join(' | ')} |`);
+            }
+        });
+        
+        if (markdownTable.length > 0) {
+            // 替换表格内容
+            table.textContent = `\n\n${markdownTable.join('\n')}\n\n`;
+        }
+    });
+    
+    // 处理代码块
+    const preElements = elementClone.querySelectorAll('pre');
+    preElements.forEach(pre => {
+        const code = pre.querySelector('code');
+        const codeText = (code || pre).textContent.trim();
+        const language = code ? (code.className.match(/language-(\w+)/) || [])[1] || '' : '';
+        
+        pre.textContent = `\n\n\`\`\`${language}\n${codeText}\n\`\`\`\n\n`;
+    });
+    
+    // 处理内联代码
+    const codeElements = elementClone.querySelectorAll('code:not(pre code)');
+    codeElements.forEach(code => {
+        code.textContent = `\`${code.textContent.trim()}\``;
+    });
+    
+    // 处理引用
+    const blockquotes = elementClone.querySelectorAll('blockquote');
+    blockquotes.forEach(blockquote => {
+        const lines = blockquote.textContent.trim().split('\n');
+        const quotedLines = lines.map(line => `> ${line}`).join('\n');
+        blockquote.textContent = `\n\n${quotedLines}\n\n`;
+    });
+    
+    // 处理分割线
+    const hrs = elementClone.querySelectorAll('hr');
+    hrs.forEach(hr => {
+        hr.textContent = '\n\n---\n\n';
+    });
+    
+    // 获取处理后的文本内容
+    let markdown = elementClone.textContent
+        .replace(/\n{3,}/g, '\n\n') // 将多个换行符替换为两个
+        .trim();
+    
+    return markdown;
+}
+
+/**
+ * 判断是否可能是SPA应用
+ * @param {string} html - HTML内容
+ * @returns {boolean} 是否可能是SPA
+ */
+function isLikelySPA(html) {
+    // 检查是否有常见的SPA框架特征
+    const spaIndicators = [
+        /<div id="app"/i,
+        /<div id="root"/i,
+        /react/i,
+        /vue/i,
+        /angular/i,
+        /id="__next"/i,  // Next.js
+        /data-reactroot/i,
+        /ng-app/i,  // Angular
+        /nuxt/i      // Nuxt.js
+    ];
+    
+    return spaIndicators.some(indicator => indicator.test(html));
+}
+
+/**
+ * 请求剪贴板权限
+ * @returns {Promise<boolean>} 是否获得权限
+ */
+async function requestClipboardPermission() {
+    // 检查是否运行在安全上下文中（HTTPS或localhost）
+    const isSecureContext = window.isSecureContext || 
+                          location.protocol === 'https:' || 
+                          location.hostname === 'localhost' || 
+                          location.hostname === '127.0.0.1';
+    
+    // 如果不在安全上下文中，无法获取权限
+    if (!isSecureContext) {
+        console.warn('Clipboard API requires secure context (HTTPS or localhost)');
+        return false;
+    }
+    
+    // 检查是否支持权限API
+    if (navigator.permissions && navigator.permissions.query) {
+        try {
+            // 请求剪贴板读取权限
+            const permissionStatus = await navigator.permissions.query({ name: 'clipboard-read' });
+            
+            if (permissionStatus.state === 'granted') {
+                return true;
+            } else if (permissionStatus.state === 'prompt') {
+                // 权限状态为提示，尝试触发权限请求
+                try {
+                    // 尝试读取剪贴板，这会触发权限请求
+                    await navigator.clipboard.readText();
+                    return true;
+                } catch (e) {
+                    // 用户可能拒绝了权限请求
+                    return false;
+                }
+            } else {
+                // 权限被拒绝
+                return false;
+            }
+        } catch (error) {
+            console.warn('Permissions API error:', error);
+            // 权限API可能不支持clipboard-read
+            return false;
+        }
+    }
+    
+    // 不支持权限API，尝试直接读取来测试权限
+    try {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+            await navigator.clipboard.readText();
+            return true;
+        }
+    } catch (error) {
+        console.warn('Clipboard permission test failed:', error);
+        return false;
+    }
+    
+    return false;
+}
+
+// 导出到全局作用域
 window.TextUtils = {
     removeLineBreaks,
     smartProcessText,
@@ -474,5 +955,9 @@ window.TextUtils = {
     throttle,
     detectBrowserCapabilities,
     formatFileSize,
-    getTextStats
+    getTextStats,
+    isValidUrl,
+    fetchWebContent,
+    htmlToMarkdown,
+    requestClipboardPermission
 };

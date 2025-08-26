@@ -4,115 +4,160 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LineWeaver - 文本换行符去除工具</title>
-    <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/responsive.css">
+    <meta name="description" content="一个简单优雅的文本换行符去除工具，让文本像流水般顺畅连续，无需手动处理换行符">
+    <meta name="keywords" content="文本处理, 换行符, 格式化, 粘贴, AI工具">
+    <!-- 使用相对路径引用CSS文件 -->
+    <link rel="stylesheet" href="./styles/enhanced.css">
+    <!-- 添加favicon -->
+    <link rel="icon" href="./favicon.ico" type="image/x-icon">
+    <!-- Open Graph 标签 -->
+    <meta property="og:title" content="LineWeaver - 文本换行符去除工具">
+    <meta property="og:description" content="一个简单优雅的文本换行符去除工具，让文本像流水般顺畅连续，无需手动处理换行符">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://misonl.github.io/LineWeaver/">
 </head>
 <body>
-    <!-- 顶部标题栏 -->
-    <header class="app-header">
-        <h1 class="app-title">LineWeaver</h1>
-        <p class="app-subtitle">粘贴多行文本，点击转换去除所有换行符，生成连续文本并支持一键复制</p>
-        <a href="https://github.com/LineWeaver/LineWeaver" target="_blank" class="github-link" title="在GitHub上查看项目">
-            <svg class="github-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-            </svg>
-        </a>
+    <header>
+        <div class="container">
+            <h1>🌊 LineWeaver</h1>
+            <p class="subtitle">一个简单优雅的文本换行符去除工具</p>
+            <!-- GitHub图标链接 -->
+            <a href="https://github.com/MisonL/LineWeaver" target="_blank" class="github-link" title="查看GitHub项目">
+                <svg class="github-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M12 0C5.37 0 0 5.37 0 12C0 17.31 3.435 21.795 8.205 23.385C8.805 23.49 9.03 23.13 9.03 22.815C9.03 22.53 9.015 21.585 9.015 20.58C6 21.135 5.22 19.845 4.98 19.17C4.845 18.825 4.26 17.76 3.75 17.475C3.33 17.25 2.73 16.695 3.735 16.68C4.68 16.665 5.355 17.55 5.58 17.91C6.66 19.725 8.385 19.215 9.075 18.9C9.18 18.12 9.495 17.595 9.84 17.295C7.17 16.995 4.38 15.96 4.38 11.37C4.38 10.065 4.845 8.985 5.61 8.145C5.49 7.845 5.07 6.615 5.73 4.965C5.73 4.965 6.735 4.65 9.03 6.195C9.99 5.925 11.01 5.79 12.03 5.79C13.05 5.79 14.07 5.925 15.03 6.195C17.325 4.635 18.33 4.965 18.33 4.965C18.99 6.615 18.57 7.845 18.45 8.145C19.215 8.985 19.68 10.05 19.68 11.37C19.68 15.975 16.875 16.995 14.205 17.295C14.64 17.67 15.015 18.39 15.015 19.515C15.015 21.12 15 22.41 15 22.815C15 23.13 15.225 23.505 15.825 23.385C20.565 21.795 24 17.295 24 12C24 5.37 18.63 0 12 0Z" fill="currentColor"/>
+                </svg>
+            </a>
+        </div>
     </header>
 
-    <!-- 主工作区 -->
-    <main class="app-main">
-        <!-- 左侧输入区 -->
-        <section class="input-panel">
-            <div class="panel-header">
-                <h2 class="panel-title">📝 输入文本</h2>
-                <div class="panel-actions">
-                    <button id="pasteBtn" class="paste-btn" type="button" title="清空输入框并粘贴剪贴板内容">
-                        📋 粘贴
-                    </button>
-                    <button id="exampleBtn" class="example-btn" type="button">
-                        💡 加载示例
-                    </button>
+    <main>
+        <div class="container">
+            <!-- 输入区域 -->
+            <section class="input-section">
+                <div class="input-header">
+                    <h2>📝 输入文本</h2>
+                    <div class="button-group">
+                        <button id="pasteBtn" class="btn btn-secondary" title="从剪贴板粘贴文本">📋 粘贴</button>
+                        <button id="exampleBtn" class="btn btn-secondary" title="加载示例文本">💡 加载示例</button>
+                    </div>
                 </div>
-            </div>
-            
+                <textarea id="inputText" class="text-area" placeholder="在此处粘贴包含换行符的文本..."></textarea>
+            </section>
+
+            <!-- URL获取区域 -->
+            <section class="url-section">
+                <div class="url-input-container">
+                    <input type="text" id="urlInput" placeholder="输入网址，获取内容并转换..." />
+                    <button id="fetchUrlBtn" class="btn btn-primary">🔗 获取内容</button>
+                </div>
+                <p class="url-note">输入网址获取内容并自动转换为Markdown格式，方便AI理解。注意：受浏览器安全限制，某些网站可能无法获取。</p>
+            </section>
+
             <!-- 处理模式选择 -->
-            <div class="mode-selector">
-                <div class="mode-options">
-                    <label class="mode-option">
+            <section class="mode-section">
+                <div class="mode-selector">
+                    <label>
                         <input type="radio" name="processMode" value="simple">
                         <span class="mode-label">🔄 简单</span>
                     </label>
-                    <label class="mode-option">
+                    <label>
                         <input type="radio" name="processMode" value="smart" checked>
                         <span class="mode-label">🧠 智能</span>
                     </label>
-                    <label class="mode-option">
+                    <label>
                         <input type="radio" name="processMode" value="custom">
                         <span class="mode-label">🎨 自定义</span>
                     </label>
                 </div>
-            </div>
-            
-            <!-- 自定义模式配置 -->
-            <div class="custom-config" id="customConfig" style="display: none;">
-                <div class="config-row">
-                    <input type="text" id="paragraphSeparator" value="[PARA]" placeholder="段落分隔符">
-                    <input type="text" id="listSeparator" value="[LIST]" placeholder="列表标识">
+                
+                <!-- 自定义配置区域 -->
+                <div id="customConfig" class="custom-config">
+                    <div class="config-item">
+                        <label for="paragraphSeparator">段落分隔符:</label>
+                        <input type="text" id="paragraphSeparator" value="[PARA]" placeholder="如 [PARA], ||, ..." />
+                    </div>
+                    <div class="config-item">
+                        <label for="listSeparator">列表项分隔符:</label>
+                        <input type="text" id="listSeparator" value="[LIST]" placeholder="如 [LIST], →, ..." />
+                    </div>
                 </div>
-            </div>
-            
-            <textarea 
-                id="inputText" 
-                class="input-textarea" 
-                placeholder="请在此粘贴需要处理的多行文本..."
-            ></textarea>
-            
-            <button id="convertBtn" class="convert-btn">
-                <span class="btn-text">转换文本</span>
-                <span class="btn-loading" style="display: none;">处理中...</span>
-            </button>
-        </section>
+            </section>
 
-        <!-- 右侧输出区 -->
-        <section class="output-panel">
-            <div class="panel-header">
-                <h2 class="panel-title">✨ 输出结果</h2>
-                <div class="text-stats" id="textStats" style="display: none;">
-                    <span class="stats-item">🔢 <span id="charCount">0</span></span>
-                    <span class="stats-item">🗺️ <span id="wordCount">0</span></span>
-                    <span class="stats-item">✨ -<span id="savedChars">0</span></span>
+            <!-- 处理按钮 -->
+            <section class="action-section">
+                <button id="convertBtn" class="btn btn-primary convert-btn">
+                    <span class="btn-text">🧠 智能转换</span>
+                    <span class="btn-loading">
+                        <span class="spinner"></span>
+                    </span>
+                </button>
+            </section>
+
+            <!-- 输出区域 -->
+            <section class="output-section">
+                <div class="output-header">
+                    <h2>🚀 转换结果</h2>
+                    <div class="button-group">
+                        <button id="copyBtn" class="btn btn-primary" disabled>
+                            <span class="btn-text">📋 复制到剪贴板</span>
+                            <span class="btn-success">✅ 已复制!</span>
+                        </button>
+                    </div>
                 </div>
-            </div>
-            
-            <textarea 
-                id="outputText" 
-                class="output-textarea" 
-                placeholder="转换后的文本将显示在这里..."
-                readonly
-            ></textarea>
-            
-            <button id="copyBtn" class="copy-btn" disabled>
-                <span class="btn-text">复制到剪贴板</span>
-                <span class="btn-success" style="display: none;">复制成功!</span>
-            </button>
-        </section>
+                <textarea id="outputText" class="text-area output-textarea" placeholder="转换后的文本将显示在这里..." readonly></textarea>
+                
+                <!-- 文本统计 -->
+                <div id="textStats" class="text-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">字符数:</span>
+                        <span id="charCount" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">单词数:</span>
+                        <span id="wordCount" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">节省字符:</span>
+                        <span id="savedChars" class="stat-value">0</span>
+                    </div>
+                </div>
+            </section>
+        </div>
     </main>
 
-    <!-- Toast 消息提示 -->
+    <!-- 错误提示 -->
+    <div id="errorAlert" class="error-alert">
+        <div class="error-content">
+            <h3>⚠️ 检测到可能的错误信息</h3>
+            <p>输入内容看起来可能是错误日志或代码片段。请确认您是否需要：</p>
+            <ol>
+                <li>删除格式化符号（换行符、缩进等）</li>
+                <li>保留代码结构（使用智能模式）</li>
+            </ol>
+            <button id="clearErrorBtn" class="btn btn-secondary">清除并重试</button>
+        </div>
+    </div>
+
+    <!-- Toast消息 -->
     <div id="toast" class="toast">
-        <span class="toast-message"></span>
+        <div class="toast-content">
+            <span class="toast-message"></span>
+        </div>
     </div>
 
     <!-- 页脚 -->
-    <footer class="app-footer">
-        <p>&copy; 2025 LineWeaver - 简单实用的文本处理工具</p>
-        <div class="footer-info">
-            <span class="footer-item">作者: <a href="#" class="footer-link">Mison</a></span>
-            <span class="footer-item">许可证: <a href="https://opensource.org/licenses/MIT" target="_blank" class="footer-link">MIT</a></span>
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 LineWeaver - <a href="https://github.com/MisonL/LineWeaver" target="_blank" class="footer-link">GitHub</a></p>
+            <div class="footer-info">
+                <span class="footer-item">遵循 <a href="https://opensource.org/licenses/MIT" target="_blank" class="footer-link">MIT 许可证</a> 开源</span>
+                <span class="footer-item">作者：Mison</span>
+            </div>
         </div>
     </footer>
 
-    <script src="scripts/utils.js"></script>
-    <script src="scripts/app.js"></script>
+    <!-- 核心脚本 -->
+    <script src="./scripts/utils.js"></script>
+    <script src="./scripts/app.js"></script>
 </body>
 </html>
