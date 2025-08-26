@@ -59,12 +59,11 @@ temp/
 *.md
 !README.md
 
-# 测试相关（保留 test.html）
+# 测试相关
 test/
 tests/
 *.test.js
 *.spec.js
-!test.html
 
 # 配置文件（根据需要调整）
 .env

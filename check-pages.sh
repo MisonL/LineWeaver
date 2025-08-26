@@ -13,9 +13,9 @@ BLUE='\033[0;34m'
 PURPLE='\033[0;35m'
 NC='\033[0m' # No Color
 
-# 项目配置
-GITHUB_USER="MisonL"
-REPO_NAME="LineWeaver"
+# 项目配置 - 从环境变量获取或使用默认值
+GITHUB_USER="${GITHUB_USER:-MisonL}"
+REPO_NAME="${REPO_NAME:-LineWeaver}"
 PAGES_URL="https://${GITHUB_USER}.github.io/${REPO_NAME}"
 
 # 函数：打印带颜色的消息
@@ -30,17 +30,28 @@ echo "======================================"
 
 # 检查1：验证URL响应
 print_message $YELLOW "📡 检查页面响应状态..."
-HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$PAGES_URL" || echo "000")
+# 跟随重定向获取最终状态码
+HTTP_STATUS=$(curl -s -L -o /dev/null -w "%{http_code}" "$PAGES_URL" || echo "000")
+# 获取不跟随重定向的状态码
+REDIRECT_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$PAGES_URL" || echo "000")
 
 if [ "$HTTP_STATUS" = "200" ]; then
-    print_message $GREEN "✅ 页面正常访问 (HTTP $HTTP_STATUS)"
-    print_message $GREEN "🌐 在线体验地址：$PAGES_URL"
+    if [ "$REDIRECT_STATUS" = "301" ] || [ "$REDIRECT_STATUS" = "302" ]; then
+        print_message $GREEN "✅ 页面正常访问 (最终HTTP $HTTP_STATUS，重定向前 $REDIRECT_STATUS)"
+        print_message $GREEN "🌐 在线体验地址：$PAGES_URL"
+    else
+        print_message $GREEN "✅ 页面正常访问 (HTTP $HTTP_STATUS)"
+        print_message $GREEN "🌐 在线体验地址：$PAGES_URL"
+    fi
 elif [ "$HTTP_STATUS" = "404" ]; then
     print_message $RED "❌ 页面未找到 (HTTP $HTTP_STATUS)"
     print_message $YELLOW "⚠️  这可能意味着："
     echo "   - GitHub Actions 工作流还在运行中"
     echo "   - 部署失败或配置错误"
     echo "   - GitHub Pages 尚未激活"
+elif [ "$REDIRECT_STATUS" = "301" ] || [ "$REDIRECT_STATUS" = "302" ]; then
+    print_message $YELLOW "⚠️  页面重定向 (HTTP $REDIRECT_STATUS)"
+    print_message $YELLOW "   最终页面状态: HTTP $HTTP_STATUS"
 else
     print_message $RED "❌ 页面访问异常 (HTTP $HTTP_STATUS)"
 fi
@@ -55,11 +66,23 @@ fi
 
 # 检查3：验证必要文件
 print_message $YELLOW "📁 检查必要文件..."
-for file in "index.html" "styles/main.css" "scripts/app.js"; do
+# 检查核心文件
+CORE_FILES=("index.html" "styles/enhanced.css" "scripts/app.js")
+for file in "${CORE_FILES[@]}"; do
     if [ -f "$file" ]; then
         print_message $GREEN "✅ $file 存在"
     else
         print_message $RED "❌ $file 缺失"
+    fi
+done
+
+# 检查额外资源文件
+EXTRA_FILES=("favicon.ico" "README.md")
+for file in "${EXTRA_FILES[@]}"; do
+    if [ -f "$file" ]; then
+        print_message $GREEN "✅ $file 存在"
+    else
+        print_message $YELLOW "⚠️  $file 缺失"
     fi
 done
 
@@ -102,11 +125,12 @@ echo ""
 print_message $BLUE "📊 状态摘要："
 echo "======================================"
 echo "🌐 页面地址: $PAGES_URL"
-echo "📊 HTTP状态: $HTTP_STATUS"
+echo "📊 最终HTTP状态: $HTTP_STATUS"
+echo "📊 重定向前状态: $REDIRECT_STATUS"
 echo "⏰ 检查时间: $(date)"
 
 # 如果页面正常，尝试获取页面标题
 if [ "$HTTP_STATUS" = "200" ]; then
-    TITLE=$(curl -s "$PAGES_URL" | grep -o '<title>[^<]*</title>' | sed 's/<\/*title>//g' 2>/dev/null || echo "无法获取")
+    TITLE=$(curl -s -L "$PAGES_URL" | grep -o '<title>[^<]*</title>' | sed 's/<\/*title>//g' 2>/dev/null || echo "无法获取")
     echo "📄 页面标题: $TITLE"
 fi

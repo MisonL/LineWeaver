@@ -24,7 +24,7 @@ services:
       - "com.docker.compose.project=lineweaver"
       - "description=文本换行符去除工具"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
       interval: 30s
       timeout: 10s
       retries: 3
