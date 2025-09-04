@@ -614,7 +614,11 @@ function handleKeyboardShortcuts(event) {
     }
     
     // Ctrl/Cmd + V: 当非输入区域收到粘贴快捷键时，聚焦到输入框
-    if ((event.ctrlKey || event.metaKey) && event.key === 'v' && event.target !== Elements.inputText && event.target !== Elements.outputText) {
+    // 但是如果当前焦点在 URL 输入框，则不要干预，让其正常粘贴
+    if ((event.ctrlKey || event.metaKey) && event.key === 'v' && 
+        event.target !== Elements.inputText && 
+        event.target !== Elements.outputText && 
+        event.target !== Elements.urlInput) {
         // 只聚焦到输入框，不防止默认粘贴行为
         if (Elements.inputText) {
             // 清空输入框
