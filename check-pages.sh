@@ -93,6 +93,28 @@ else
     print_message $YELLOW "⚠️  .nojekyll 文件缺失，Jekyll可能会干扰部署"
 fi
 
+# 检查5：测试API接口
+print_message $YELLOW "🔌 测试API接口..."
+API_DOCS_URL="${PAGES_URL}/api-docs.html"
+API_STATUS=$(curl -s -L -o /dev/null -w "%{http_code}" "$API_DOCS_URL" || echo "000")
+
+if [ "$API_STATUS" = "200" ]; then
+    print_message $GREEN "✅ API文档页面正常 (HTTP $API_STATUS)"
+    print_message $GREEN "📚 API文档地址：$API_DOCS_URL"
+elif [ "$API_STATUS" = "404" ]; then
+    print_message $RED "❌ API文档页面未找到 (HTTP $API_STATUS)"
+    print_message $YELLOW "⚠️  检查GitHub Actions工作流是否包含api-docs.html"
+else
+    print_message $RED "❌ API文档页面异常 (HTTP $API_STATUS)"
+fi
+
+# 检查6：验证API文档文件
+if [ -f "api-docs.html" ]; then
+    print_message $GREEN "✅ api-docs.html 文件存在"
+else
+    print_message $RED "❌ api-docs.html 文件缺失"
+fi
+
 echo ""
 print_message $PURPLE "🛠️  下一步操作建议："
 echo "======================================"
@@ -124,8 +146,10 @@ fi
 echo ""
 print_message $BLUE "📊 状态摘要："
 echo "======================================"
-echo "🌐 页面地址: $PAGES_URL"
-echo "📊 最终HTTP状态: $HTTP_STATUS"
+echo "🌐 主页面地址: $PAGES_URL"
+echo "📚 API文档地址: $API_DOCS_URL"
+echo "📊 主页面状态: $HTTP_STATUS"
+echo "📊 API文档状态: $API_STATUS"
 echo "📊 重定向前状态: $REDIRECT_STATUS"
 echo "⏰ 检查时间: $(date)"
 
@@ -133,4 +157,10 @@ echo "⏰ 检查时间: $(date)"
 if [ "$HTTP_STATUS" = "200" ]; then
     TITLE=$(curl -s -L "$PAGES_URL" | grep -o '<title>[^<]*</title>' | sed 's/<\/*title>//g' 2>/dev/null || echo "无法获取")
     echo "📄 页面标题: $TITLE"
+fi
+
+# 如果API文档正常，获取API文档标题
+if [ "$API_STATUS" = "200" ]; then
+    API_TITLE=$(curl -s -L "$API_DOCS_URL" | grep -o '<title>[^<]*</title>' | sed 's/<\/*title>//g' 2>/dev/null || echo "无法获取")
+    echo "📚 API文档标题: $API_TITLE"
 fi
