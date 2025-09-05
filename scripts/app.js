@@ -49,8 +49,12 @@ function initializeApp() {
 
     // 初始化事件监听器
     function initEventListeners() {
+        console.log('初始化事件监听器...');
+        
         // 模式选择器
         const modeRadios = document.querySelectorAll('input[name="processMode"]');
+        console.log('找到模式选择器:', modeRadios.length);
+        
         modeRadios.forEach(radio => {
             radio.addEventListener('change', handleModeChange);
         });
@@ -62,19 +66,24 @@ function initializeApp() {
         }
         
         // 初始化显示状态
-        handleModeChange();
-        handleLineBreakChange();
+        setTimeout(() => {
+            handleModeChange();
+            handleLineBreakChange();
+        }, 100);
     }
 
 /**
  * 处理模式变更
  */
 function handleModeChange() {
-    const selectedMode = document.querySelector('input[name="processMode"]:checked')?.value;
+    const selectedMode = document.querySelector('input[name="processMode"]:checked')?.value || 'smart';
     const customConfig = document.getElementById('customConfig');
+    
+    console.log('Mode changed to:', selectedMode);
     
     if (customConfig) {
         customConfig.style.display = selectedMode === 'custom' ? 'block' : 'none';
+        console.log('Custom config display:', selectedMode === 'custom' ? 'block' : 'none');
     }
     
     // 更新按钮文本
@@ -1197,6 +1206,8 @@ function updateProgress(progress, current, total) {
         progressPercent.textContent = `${progress}%`;
     }
 }
+
+
 
 // 导出到全局作用域（用于调试）
 window.App = {

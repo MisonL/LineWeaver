@@ -338,15 +338,14 @@ header h1 {
 /* 自定义配置 */
 .custom-config {
     display: none;
-    padding: var(--spacing-4);
+    padding: var(--spacing-6);
     background: var(--gray-50);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
-    margin-top: var(--spacing-3);
-}
-
-.custom-config.active {
-    display: block;
+    border-radius: var(--radius-lg);
+    margin-top: var(--spacing-4);
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .config-item {
