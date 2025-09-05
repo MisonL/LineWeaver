@@ -149,7 +149,7 @@ function cacheElements() {
     Elements.outputText = document.getElementById('outputText');
     Elements.convertBtn = document.getElementById('convertBtn');
     Elements.copyBtn = document.getElementById('copyBtn');
-    Elements.powershellCopyBtn = document.getElementById('powershellCopyBtn');
+    
     Elements.pasteBtn = document.getElementById('pasteBtn');
     Elements.urlInput = document.getElementById('urlInput');
     Elements.fetchUrlBtn = document.getElementById('fetchUrlBtn');
@@ -181,10 +181,7 @@ function bindEventListeners() {
         Elements.copyBtn.addEventListener('click', handleCopy);
     }
     
-    // PowerShell复制按钮点击事件
-    if (Elements.powershellCopyBtn) {
-        Elements.powershellCopyBtn.addEventListener('click', handlePowerShellCopy);
-    }
+    
     
     // 示例按钮点击事件
     const exampleBtn = document.getElementById('exampleBtn');
@@ -639,43 +636,7 @@ async function handleCopy() {
     }
 }
 
-/**
- * 处理PowerShell格式复制
- */
-async function handlePowerShellCopy() {
-    if (AppState.isCopying || !AppState.outputText) {
-        return;
-    }
-    
-    try {
-        // 设置复制状态
-        setCopyingState(true);
-        
-        // 使用PowerShell格式处理
-        const powershellText = PowerShellUtils.processForPowerShellAI(AppState.outputText).text;
-        
-        // 执行复制操作
-        const success = await TextUtils.copyToClipboard(powershellText);
-        
-        if (success) {
-            // 显示成功状态
-            showCopySuccess();
-            
-            const textLength = powershellText.length;
-            const message = `已复制PowerShell格式文本（${textLength}字符）到剪贴板`;
-            TextUtils.showToast(message, 'success');
-        } else {
-            // 复制失败，提供备选方案
-            handleCopyFailure();
-        }
-        
-    } catch (error) {
-        console.error('PowerShell复制操作出错:', error);
-        handleCopyFailure();
-    } finally {
-        setCopyingState(false);
-    }
-}
+
 
 /**
  * 处理输入框内容变化
