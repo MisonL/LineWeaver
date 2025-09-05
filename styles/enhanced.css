@@ -335,18 +335,33 @@ header h1 {
     font-weight: var(--font-weight-semibold);
 }
 
-/* 自定义配置 - 美化版本 */
+/* 自定义配置 - 优化自适应版本 */
 .custom-config {
     display: none;
     background: linear-gradient(135deg, var(--surface) 0%, var(--gray-50) 100%);
     border: 1px solid var(--border);
-    border-radius: var(--radius-xl);
-    margin-top: var(--spacing-6);
-    max-width: 600px;
+    border-radius: var(--radius-lg);
+    margin-top: var(--spacing-4);
     margin-left: auto;
     margin-right: auto;
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-sm);
     overflow: hidden;
+    width: 100%;
+    max-width: 480px;
+}
+
+@media (min-width: 768px) {
+    .custom-config {
+        max-width: 520px;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+    }
+}
+
+@media (min-width: 1024px) {
+    .custom-config {
+        max-width: 580px;
+    }
 }
 
 .custom-config.active {
@@ -367,56 +382,65 @@ header h1 {
 
 .config-header {
     background: linear-gradient(135deg, var(--primary-50) 0%, var(--primary-100) 100%);
-    padding: var(--spacing-6);
+    padding: var(--spacing-4);
     text-align: center;
     border-bottom: 1px solid var(--border);
 }
 
 .config-header h3 {
-    margin: 0 0 var(--spacing-2) 0;
-    font-size: var(--font-size-xl);
+    margin: 0 0 var(--spacing-1) 0;
+    font-size: var(--font-size-lg);
     font-weight: var(--font-weight-semibold);
     color: var(--primary-700);
 }
 
 .config-header p {
     margin: 0;
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
     color: var(--text-secondary);
 }
 
 .config-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: var(--spacing-6);
-    padding: var(--spacing-6);
+    gap: var(--spacing-4);
+    padding: var(--spacing-4);
 }
 
 @media (min-width: 768px) {
     .config-grid {
         grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-3);
+        padding: var(--spacing-4);
+    }
+}
+
+@media (min-width: 1024px) {
+    .config-grid {
+        gap: var(--spacing-4);
+        padding: var(--spacing-5);
     }
 }
 
 .config-section {
     background: var(--surface);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-5);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-3);
     border: 1px solid var(--border);
 }
 
 .config-section h4 {
-    margin: 0 0 var(--spacing-4) 0;
-    font-size: var(--font-size-lg);
+    margin: 0 0 var(--spacing-3) 0;
+    font-size: var(--font-size-base);
     font-weight: var(--font-weight-semibold);
     color: var(--text-primary);
     display: flex;
     align-items: center;
-    gap: var(--spacing-2);
+    gap: var(--spacing-1);
 }
 
 .config-item {
-    margin-bottom: var(--spacing-4);
+    margin-bottom: var(--spacing-3);
 }
 
 .config-item:last-child {
@@ -425,18 +449,25 @@ header h1 {
 
 .config-item label {
     display: block;
-    margin-bottom: var(--spacing-2);
-    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-1);
+    font-size: var(--font-size-xs);
     font-weight: var(--font-weight-medium);
     color: var(--text-primary);
 }
 
+.config-item small {
+    display: block;
+    margin-top: var(--spacing-0_5);
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+}
+
 .config-input, .config-select {
     width: 100%;
-    padding: var(--spacing-3);
+    padding: var(--spacing-2);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
-    font-size: var(--font-size-sm);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
     background: var(--surface);
     transition: border-color 0.2s, box-shadow 0.2s;
 }
@@ -444,52 +475,53 @@ header h1 {
 .config-input:focus, .config-select:focus {
     outline: none;
     border-color: var(--primary-500);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }
 
 .config-select {
     cursor: pointer;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-    background-position: right 0.5rem center;
+    background-position: right 0.25rem center;
     background-repeat: no-repeat;
-    background-size: 1.5em 1.5em;
-    padding-right: 2.5rem;
+    background-size: 1.2em 1.2em;
+    padding-right: 2rem;
 }
 
 .input-group {
     display: flex;
     align-items: center;
-    gap: var(--spacing-2);
+    gap: var(--spacing-1);
 }
 
 .number-input {
-    max-width: 120px;
+    max-width: 80px;
+    text-align: center;
 }
 
 .input-unit {
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
     color: var(--text-secondary);
 }
 
 .checkbox-label {
     display: flex;
     align-items: center;
-    gap: var(--spacing-2);
+    gap: var(--spacing-1);
     cursor: pointer;
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
     font-weight: var(--font-weight-medium);
     color: var(--text-primary);
 }
 
 .checkbox-label input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     margin: 0;
 }
 
 .config-footer {
     background: var(--gray-50);
-    padding: var(--spacing-4);
+    padding: var(--spacing-3);
     text-align: center;
     border-top: 1px solid var(--border);
 }
@@ -500,21 +532,21 @@ header h1 {
 }
 
 .custom-input {
-    margin-top: var(--spacing-2);
+    margin-top: var(--spacing-1);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 480px) {
+    .config-header {
+        padding: var(--spacing-3);
+    }
+    
     .config-grid {
-        grid-template-columns: 1fr;
-        gap: var(--spacing-4);
+        padding: var(--spacing-3);
+        gap: var(--spacing-2);
     }
     
     .config-section {
-        padding: var(--spacing-4);
-    }
-    
-    .config-header {
-        padding: var(--spacing-4);
+        padding: var(--spacing-2);
     }
 }
 
