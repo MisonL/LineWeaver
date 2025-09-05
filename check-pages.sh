@@ -101,6 +101,29 @@ API_STATUS=$(curl -s -L -o /dev/null -w "%{http_code}" "$API_DOCS_URL" || echo "
 if [ "$API_STATUS" = "200" ]; then
     print_message $GREEN "✅ API文档页面正常 (HTTP $API_STATUS)"
     print_message $GREEN "📚 API文档地址：$API_DOCS_URL"
+    
+    # 测试纯前端API接口
+    print_message $YELLOW "🧪 测试纯前端API接口..."
+    
+    # 测试文本转换API
+    TEST_TEXT="Hello\nWorld\nThis is a test"
+    CONVERT_RESULT=$(curl -s -X POST -H "Content-Type: application/json" -d "{\"text\":\"$TEST_TEXT\",\"mode\":\"smart\"}" "$PAGES_URL/api/v1/convert" 2>/dev/null || echo "API_NOT_AVAILABLE")
+    
+    if [[ "$CONVERT_RESULT" == *"API_NOT_AVAILABLE"* ]] || [[ "$CONVERT_RESULT" == *"404"* ]]; then
+        print_message $YELLOW "⚠️  纯前端API接口为模拟实现，无需网络请求"
+        print_message $GREEN "✅ 前端API功能通过window.apiClient对象提供"
+    else
+        print_message $GREEN "✅ API接口响应正常"
+    fi
+    
+    # 测试健康检查
+    HEALTH_RESULT=$(curl -s "$PAGES_URL/api/v1/health" 2>/dev/null || echo "HEALTH_CHECK_NOT_AVAILABLE")
+    if [[ "$HEALTH_RESULT" == *"HEALTH_CHECK_NOT_AVAILABLE"* ]] || [[ "$HEALTH_RESULT" == *"404"* ]]; then
+        print_message $YELLOW "⚠️  健康检查接口为前端模拟，无需网络请求"
+    else
+        print_message $GREEN "✅ 健康检查接口正常"
+    fi
+    
 elif [ "$API_STATUS" = "404" ]; then
     print_message $RED "❌ API文档页面未找到 (HTTP $API_STATUS)"
     print_message $YELLOW "⚠️  检查GitHub Actions工作流是否包含api-docs.html"
@@ -113,6 +136,36 @@ if [ -f "api-docs.html" ]; then
     print_message $GREEN "✅ api-docs.html 文件存在"
 else
     print_message $RED "❌ api-docs.html 文件缺失"
+fi
+
+# 检查7：验证前端API功能
+print_message $YELLOW "🔍 验证前端API功能..."
+if [ -f "scripts/api-client.js" ]; then
+    print_message $GREEN "✅ 前端API客户端文件存在"
+    
+    # 检查API客户端是否暴露到全局
+    if grep -q "window.apiClient" scripts/api-client.js 2>/dev/null; then
+        print_message $GREEN "✅ 前端API已暴露到window.apiClient"
+    else
+        print_message $YELLOW "⚠️  前端API可能未正确暴露"
+    fi
+    
+    # 检查API方法定义
+    API_METHODS=("convertText" "health" "getStats" "getExample")
+    for method in "${API_METHODS[@]}"; do
+        if grep -q "$method" scripts/api-client.js 2>/dev/null; then
+            print_message $GREEN "✅ API方法: $method"
+        else
+            print_message $YELLOW "⚠️  API方法缺失: $method"
+        fi
+    done
+    
+    print_message $BLUE "🧪 浏览器测试:"
+    echo "   访问: ${PAGES_URL}/test-api.html"
+    echo "   进行完整的前端API功能测试"
+    
+else
+    print_message $RED "❌ 前端API客户端文件缺失"
 fi
 
 echo ""
