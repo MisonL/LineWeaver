@@ -173,31 +173,7 @@
             color: #1e40af;
         }
 
-        .test-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .test-stat {
-            background: #f1f5f9;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            text-align: center;
-        }
-
-        .test-stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--test-primary);
-        }
-
-        .test-stat-label {
-            font-size: 0.875rem;
-            color: #64748b;
-            margin-top: 0.25rem;
-        }
+        
 
         .nav-back {
             display: inline-flex;
@@ -273,35 +249,16 @@ formatting styles</textarea>
             </div>
 
             <div class="test-card">
-                <h2>🏥 系统状态</h2>
+                <h2>🎯 功能测试</h2>
                 <div class="test-controls">
-                    <button class="test-btn" onclick="testHealthAPI()">
-                        <span>🏥</span> 健康检查
-                    </button>
-                    <button class="test-btn" onclick="testVersionAPI()">
-                        <span>📊</span> 版本信息
-                    </button>
                     <button class="test-btn" onclick="testAllAPIs()">
                         <span>🧪</span> 全面测试
-                    </button>
-                </div>
-                <div class="test-results" id="systemResults"></div>
-            </div>
-
-            <div class="test-card">
-                <h2>📋 性能统计</h2>
-                <div class="test-controls">
-                    <button class="test-btn" onclick="testStatsAPI()">
-                        <span>📈</span> 获取统计
-                    </button>
-                    <button class="test-btn" onclick="testExampleAPI()">
-                        <span>💡</span> 获取示例
                     </button>
                     <button class="test-btn" onclick="clearResults()">
                         <span>🗑️</span> 清空结果
                     </button>
                 </div>
-                <div class="test-results" id="statsResults"></div>
+                <div class="test-results" id="functionResults"></div>
             </div>
         </div>
 
