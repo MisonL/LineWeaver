@@ -33,6 +33,7 @@ jobs:
           # 复制所有静态文件
           cp index.html _site/
           cp api-docs.html _site/
+          cp test-api.html _site/
           cp favicon.ico _site/
           
           # 复制资源目录
