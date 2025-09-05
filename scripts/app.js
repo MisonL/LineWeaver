@@ -76,6 +76,23 @@ function initializeApp() {
     }
 
 /**
+ * 更新转换按钮文本
+ * @param {string} mode - 当前选择的模式
+ */
+function updateButtonText(mode) {
+    const convertBtnText = document.getElementById('convertBtnText');
+    if (!convertBtnText) return;
+    
+    const buttonTexts = {
+        'smart': '智能处理',
+        'custom': '自定义处理',
+        'terminal': '终端优化'
+    };
+    
+    convertBtnText.textContent = buttonTexts[mode] || '智能处理';
+}
+
+/**
  * 处理模式变更
  */
 function handleModeChange() {

@@ -8,7 +8,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![GitHub stars](https://img.shields.io/github/stars/MisonL/LineWeaver.svg?style=social&label=Star)](https://github.com/MisonL/LineWeaver)
-[![Version](https://img.shields.io/badge/version-v2.2.2-green.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v2.3.0-green.svg)](CHANGELOG.md)
 
 [**🚀 在线体验**](https://misonl.github.io/LineWeaver/) | [**📚 使用指南**](#使用指南) | [**📝 变更记录**](CHANGELOG.md) | [**💬 问题反馈**](https://github.com/MisonL/LineWeaver/issues)
 
@@ -59,8 +59,11 @@ flowchart LR
 - **上下文感知** - 智能识别段落、列表、代码块结构
 - **零配置** - 无需手动选择模式，系统自动适配
 
-#### 3. 🎨 自定义模式
-用户可自定义分隔符和标识符
+#### 3. 🎨 自定义模式（8个精细参数）
+- **📝 文本处理** - 换行符、空格、缩进处理
+- **🔗 连接符** - 自定义行连接符和段落分隔符
+- **🎯 特殊处理** - URL、代码块、列表格式保护
+- **⚡ 高级选项** - 压缩级别、长度限制、验证规则
 
 ### 网页内容获取
 
