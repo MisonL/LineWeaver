@@ -42,7 +42,7 @@ function initializeApp() {
     updateUIState();
     
     // 初始化模式选择器
-    initializeModeSelector();
+    initEventListeners();
     
     console.log('LineWeaver 已初始化');
 }
