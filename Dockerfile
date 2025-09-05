@@ -5,6 +5,7 @@ FROM nginx:1.25-alpine
 LABEL maintainer="LineWeaver Team"
 LABEL description="文本换行符去除工具"
     
+LABEL version="v2.4.1"
 LABEL unified.smart="true"
 
 # 创建工作目录
