@@ -1,11 +1,12 @@
-# 文本换行符去除工具 - Docker 部署配置
-# 使用 nginx 官方镜像作为基础镜像
+# 统一智能模式文本换行符去除工具 - Docker 部署配置
+# 完全集成PowerShell功能到智能检测系统
 FROM nginx:1.25-alpine
 
 # 设置维护者信息
-LABEL maintainer="TextLineRemover"
-LABEL description="文本换行符去除工具 - Docker部署版本"
-LABEL version="1.0.0"
+LABEL maintainer="LineWeaver Team"
+LABEL description="统一智能模式文本换行符去除工具"
+LABEL version="3.0.0"
+LABEL unified.smart="true"
 
 # 创建工作目录
 WORKDIR /usr/share/nginx/html
@@ -22,10 +23,12 @@ COPY README.md ./
 COPY favicon.ico ./
 COPY scripts/ ./scripts/
 COPY styles/ ./styles/
+COPY deploy-powershell.sh ./
 
 # 设置正确的文件权限
 RUN chmod -R 644 /usr/share/nginx/html/* && \
-    find /usr/share/nginx/html -type d -exec chmod 755 {} \;
+    find /usr/share/nginx/html -type d -exec chmod 755 {} \; && \
+    chmod +x /usr/share/nginx/html/deploy-powershell.sh
 
 # 创建日志目录和缓存目录，设置nginx用户权限
 RUN mkdir -p /var/log/nginx /var/cache/nginx/client_temp /var/cache/nginx/proxy_temp /var/cache/nginx/fastcgi_temp /var/cache/nginx/uwsgi_temp /var/cache/nginx/scgi_temp && \

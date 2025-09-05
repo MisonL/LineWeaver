@@ -1,36 +1,41 @@
-# 文本换行符去除工具 - Docker Compose 配置
-# 简化容器管理和部署流程
+# PowerShell优化版文本换行符去除工具 - Docker Compose 配置
+# 支持PowerShell AI CLI功能
 
 # 项目名称
-name: lineweaver
+name: lineweaver-ps
 
 services:
-  # 主应用服务
-  lineweaver:
+  # 主应用服务（PowerShell优化版）
+  lineweaver-ps:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: lineweaver-app
+    container_name: lineweaver-ps-app
     restart: unless-stopped
     ports:
-      - "8090:80"
+      - "8080:80"
     volumes:
       # 挂载日志目录（可选）
       - ./logs:/var/log/nginx
+      # 开发模式挂载源码（可选）
+      - ./scripts:/usr/share/nginx/html/scripts:ro
+      - ./styles:/usr/share/nginx/html/styles:ro
     environment:
       - NGINX_HOST=localhost
       - NGINX_PORT=80
+      - BUILD_VERSION=powershell-2.0.0
     labels:
-      - "com.docker.compose.project=lineweaver"
-      - "description=文本换行符去除工具"
+      - "com.docker.compose.project=lineweaver-ps"
+      - "description=PowerShell优化版文本换行符去除工具"
+      - "features=powershell,ai-cli,multi-format"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      test: ["CMD", "curl", "-f", "http://localhost/"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
     networks:
-      - lineweaver-network
+      - lineweaver-ps-network
 
   # Nginx 反向代理（可选，用于生产环境）
   nginx-proxy:

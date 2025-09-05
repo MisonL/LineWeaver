@@ -181,10 +181,67 @@ function processTextByMode(text, mode = 'simple', config = {}) {
 }
 
 /**
+ * 动态计算最大文本长度限制
+ * 基于设备性能和可用内存
+ * @returns {number} 建议的最大字符长度
+ */
+function getMaxTextLength() {
+    try {
+        // 检测设备内存（如果支持）
+        const memory = navigator.deviceMemory || 4; // 默认4GB
+        
+        // 检测CPU核心数
+        const cores = navigator.hardwareConcurrency || 4;
+        
+        // 基础限制（保守估计）
+        let baseLimit = 200000; // 20万字符
+        
+        // 根据设备性能调整
+        if (memory >= 8 && cores >= 8) {
+            baseLimit = 1000000; // 100万字符 - 高性能设备
+        } else if (memory >= 4 && cores >= 4) {
+            baseLimit = 500000;  // 50万字符 - 中等性能设备
+        } else if (memory >= 2) {
+            baseLimit = 300000;  // 30万字符 - 低性能设备
+        }
+        
+        // 检测是否为移动设备
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isMobile) {
+            baseLimit = Math.floor(baseLimit * 0.6); // 移动设备降低40%
+        }
+        
+        return baseLimit;
+    } catch (error) {
+        console.warn('无法检测设备性能，使用默认限制');
+        return 200000; // 默认20万字符
+    }
+}
+
+/**
  * 输入验证函数
  * @param {string} text - 需要验证的文本
  * @returns {Object} 验证结果 { isValid: boolean, message: string }
  */
+/**
+ * 清理输入文本，移除潜在的危险内容
+ * @param {string} text - 原始文本
+ * @returns {string} 清理后的安全文本
+ */
+function sanitizeInput(text) {
+    if (!text || typeof text !== 'string') return '';
+    
+    return text
+        // 移除潜在的脚本标签
+        .replace(/<script[^>]*>.*?<\/script>/gis, '')
+        // 移除javascript:协议
+        .replace(/javascript:/gi, '')
+        // 移除事件处理属性
+        .replace(/on\w+\s*=/gi, '')
+        // 限制最大长度防止内存攻击
+        .substring(0, 2000000); // 200万字符绝对上限
+}
+
 function validateInput(text) {
     if (!text || text.trim() === '') {
         return {
@@ -193,11 +250,24 @@ function validateInput(text) {
         };
     }
     
-    if (text.length > 50000) {
+    // 先清理输入
+    const sanitizedText = sanitizeInput(text);
+    if (sanitizedText !== text) {
+        console.warn('输入文本已被清理，移除了潜在的不安全内容');
+    }
+    
+    // 智能长度检查 - 根据可用内存动态调整
+    const maxLength = getMaxTextLength();
+    if (text.length > maxLength) {
         return {
             isValid: false,
-            message: '文本长度超过限制，请输入少于50000字符的文本'
+            message: `文本长度超过建议限制（${Math.floor(maxLength/1000)}K字符），建议分段处理以获得最佳性能`
         };
+    }
+    
+    // 对于超长文本给出警告但不阻止处理
+    if (text.length > 100000) {
+        console.warn('处理超长文本，可能需要较长时间...');
     }
     
     return {
@@ -330,6 +400,180 @@ function debounce(func, wait, immediate = false) {
         timeout = setTimeout(later, wait);
         if (callNow) func.apply(this, args);
     };
+}
+
+/**
+ * 分块处理大文本 - 避免UI阻塞
+ * @param {string} text - 要处理的文本
+ * @param {string} mode - 处理模式
+ * @param {Object} config - 配置对象
+ * @param {function} progressCallback - 进度回调函数
+ * @returns {Promise<string>} 处理后的文本
+ */
+async function processLargeText(text, mode, config, progressCallback) {
+    const CHUNK_SIZE = 10000; // 每块1万字符
+    const chunks = [];
+    
+    // 分割文本
+    for (let i = 0; i < text.length; i += CHUNK_SIZE) {
+        chunks.push(text.substring(i, i + CHUNK_SIZE));
+    }
+    
+    const results = [];
+    const totalChunks = chunks.length;
+    
+    // 逐块处理
+    for (let i = 0; i < chunks.length; i++) {
+        const chunk = chunks[i];
+        
+        // 处理单个块
+        const processed = processTextByMode(chunk, mode, config);
+        results.push(processed);
+        
+        // 更新进度
+        if (progressCallback) {
+            const progress = Math.round(((i + 1) / totalChunks) * 100);
+            progressCallback(progress, i + 1, totalChunks);
+        }
+        
+        // 让出控制权，避免阻塞UI
+        if (i < chunks.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 10));
+        }
+    }
+    
+    // 合并结果
+    return results.join('');
+}
+
+/**
+ * Web Worker 支持的文本处理（如果支持）
+ * @param {string} text - 要处理的文本
+ * @param {string} mode - 处理模式
+ * @param {Object} config - 配置对象
+ * @param {function} progressCallback - 进度回调函数
+ * @returns {Promise<string>} 处理后的文本
+ */
+async function processTextWithWorker(text, mode, config, progressCallback) {
+    // 检查是否支持Web Worker
+    if (!window.Worker) {
+        console.warn('当前环境不支持Web Worker，使用分块处理');
+        return processLargeText(text, mode, config, progressCallback);
+    }
+    
+    return new Promise((resolve, reject) => {
+        try {
+            // 创建内联Worker
+            const workerCode = `
+                // 导入处理函数（简化版）
+                function processTextByMode(text, mode, config) {
+                    switch (mode) {
+                        case 'simple':
+                            return text.replace(/\\n+/g, ' ').replace(/\\s+/g, ' ').trim();
+                        case 'smart':
+                            // 简化的智能处理
+                            return text
+                                .replace(/([^\\n])\\n([^\\n])/g, '$1 $2')
+                                .replace(/\\n+/g, '\\n')
+                                .replace(/\\s+/g, ' ')
+                                .trim();
+                        case 'custom':
+                            const {paragraphSeparator, listSeparator} = config;
+                            return text
+                                .replace(/\\n\\n+/g, paragraphSeparator || '[PARA]')
+                                .replace(/^\\s*[-*+]\\s+/gm, (listSeparator || '[LIST]') + ' ')
+                                .replace(/\\n/g, ' ')
+                                .replace(/\\s+/g, ' ')
+                                .trim();
+                        default:
+                            return text;
+                    }
+                }
+                
+                self.onmessage = function(e) {
+                    const {text, mode, config, chunkIndex, totalChunks} = e.data;
+                    
+                    try {
+                        const result = processTextByMode(text, mode, config);
+                        self.postMessage({
+                            success: true,
+                            result,
+                            chunkIndex,
+                            totalChunks
+                        });
+                    } catch (error) {
+                        self.postMessage({
+                            success: false,
+                            error: error.message,
+                            chunkIndex,
+                            totalChunks
+                        });
+                    }
+                };
+            `;
+            
+            const blob = new Blob([workerCode], { type: 'application/javascript' });
+            const workerUrl = URL.createObjectURL(blob);
+            const worker = new Worker(workerUrl);
+            
+            const CHUNK_SIZE = 50000; // Worker中使用更大的块
+            const chunks = [];
+            const results = [];
+            let completedChunks = 0;
+            
+            // 分割文本
+            for (let i = 0; i < text.length; i += CHUNK_SIZE) {
+                chunks.push(text.substring(i, i + CHUNK_SIZE));
+            }
+            
+            worker.onmessage = function(e) {
+                const {success, result, error, chunkIndex, totalChunks} = e.data;
+                
+                if (success) {
+                    results[chunkIndex] = result;
+                    completedChunks++;
+                    
+                    // 更新进度
+                    if (progressCallback) {
+                        const progress = Math.round((completedChunks / totalChunks) * 100);
+                        progressCallback(progress, completedChunks, totalChunks);
+                    }
+                    
+                    // 检查是否全部完成
+                    if (completedChunks === totalChunks) {
+                        worker.terminate();
+                        URL.revokeObjectURL(workerUrl);
+                        resolve(results.join(''));
+                    }
+                } else {
+                    worker.terminate();
+                    URL.revokeObjectURL(workerUrl);
+                    reject(new Error(error));
+                }
+            };
+            
+            worker.onerror = function(error) {
+                worker.terminate();
+                URL.revokeObjectURL(workerUrl);
+                reject(error);
+            };
+            
+            // 发送所有块进行处理
+            chunks.forEach((chunk, index) => {
+                worker.postMessage({
+                    text: chunk,
+                    mode,
+                    config,
+                    chunkIndex: index,
+                    totalChunks: chunks.length
+                });
+            });
+            
+        } catch (error) {
+            console.warn('Web Worker创建失败，使用分块处理', error);
+            resolve(processLargeText(text, mode, config, progressCallback));
+        }
+    });
 }
 
 /**
@@ -554,13 +798,36 @@ function getSelectedText() {
 }
 
 /**
- * 检测URL是否有效
- * @param {string} url - 要检查的URL
- * @returns {boolean} 是否是有效URL
+ * 检测URL是否有效和安全
+ * @param {string} url - 要检查的URL  
+ * @returns {boolean} 是否是有效且安全的URL
  */
 function isValidUrl(url) {
     try {
-        new URL(url);
+        const urlObj = new URL(url);
+        
+        // 只允许 HTTP/HTTPS 协议
+        if (!['http:', 'https:'].includes(urlObj.protocol)) {
+            return false;
+        }
+        
+        // 阻止访问内网地址和本地地址（安全考虑）
+        const hostname = urlObj.hostname.toLowerCase();
+        if (hostname === 'localhost' || 
+            hostname === '127.0.0.1' ||
+            hostname === '0.0.0.0' ||
+            hostname.startsWith('192.168.') ||
+            hostname.startsWith('10.') ||
+            hostname.match(/^172\.(1[6-9]|2[0-9]|3[01])\./)) {
+            return false;
+        }
+        
+        // 阻止访问保留域名
+        const reservedDomains = ['localhost', 'test', 'invalid', 'example'];
+        if (reservedDomains.some(domain => hostname.includes(domain))) {
+            return false;
+        }
+        
         return true;
     } catch (error) {
         return false;
@@ -651,43 +918,12 @@ function htmlToMarkdown(html, url = '') {
         const elementsToRemove = doc.querySelectorAll('script, style, iframe, noscript, svg');
         elementsToRemove.forEach(el => el.remove());
         
-        // 针对ITSM系统的特定处理
-        if (url.includes('itsm.qdama.cn') && url.includes('knowledgeShare')) {
-            // 尝试专门查找知识共享页面的内容
-            const knowledgeContent = doc.querySelector('.knowledge-content') || 
-                                    doc.querySelector('.knowledge-detail') ||
-                                    doc.querySelector('.knowledge-text') || 
-                                    doc.querySelector('.knowledge-body');
-            
-            if (knowledgeContent) {
-                console.log('找到ITSM知识内容元素');
-                // 提取并格式化ITSM知识内容
-                markdown += extractMarkdownFromElement(knowledgeContent, url);
-                return markdown;
-            }
-            
-            // 尝试查找有意义的文本内容的div
-            const contentDivs = Array.from(doc.querySelectorAll('div')).filter(div => {
-                const text = div.textContent.trim();
-                return text.length > 200 && !text.includes('script') && !div.querySelector('script');
-            });
-            
-            if (contentDivs.length > 0) {
-                // 选择内容最丰富的div
-                const richestDiv = contentDivs.sort((a, b) => 
-                    b.textContent.trim().length - a.textContent.trim().length
-                )[0];
-                
-                markdown += extractMarkdownFromElement(richestDiv, url);
-                return markdown;
-            }
-        }
         
-        // 查找主要内容 - 增强选择器以更好地处理SPA应用
+        // 查找主要内容 - 通用选择器适用于所有网站
         const contentSelectors = [
             'article', 'main', '.content', '.article', '.main-content',
-            '#content', '.post-content', '.knowledge-content', '.knowledge-detail',
-            '.entry-content', '.post', '.blog-post', '.entry', '.markdown-body',
+            '#content', '.post-content', '.entry-content', '.post', 
+            '.blog-post', '.entry', '.markdown-body',
             '[role="main"]', '#main-content'
         ];
         

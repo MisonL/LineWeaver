@@ -53,10 +53,10 @@ flowchart LR
 直接去除所有换行符，用空格连接
 
 #### 2. 🧠 智能模式（默认）
-- 保留段落边界 `[PARA]`
-- 识别列表结构 `[LIST]`
-- 保护代码块 `[CODE]...[/CODE]`
-- 保留表格结构
+- **统一智能处理** - 自动检测文本类型和上下文
+- **PowerShell优化** - 自动识别PowerShell CLI特征并优化转义
+- **上下文感知** - 智能识别段落、列表、代码块结构
+- **零配置** - 无需手动选择模式，系统自动适配
 
 #### 3. 🎨 自定义模式
 用户可自定义分隔符和标识符
@@ -118,14 +118,23 @@ sudo systemctl start nginx
 
 ## 🔧 技术实现
 
+### 统一智能处理系统
+- **🧠 上下文感知** - 自动检测PowerShell、代码、Markdown等格式
+- **⚡ 零配置** - 无需手动选择模式，智能应用优化
+- **🔄 向后兼容** - 保留原有API接口，平滑升级
+
 ### 核心算法
 ```javascript
-function removeLineBreaks(text) {
-    return text
-        .replace(/[\r\n]+/g, ' ')  // 替换换行符为空格
-        .replace(/\s+/g, ' ')      // 合并多个空格
-        .trim();                   // 去除首尾空白
-}
+// 统一智能处理器
+const SmartMode = {
+    process(text) {
+        // 自动上下文检测
+        const context = this.analyzeContext(text);
+        
+        // 智能处理
+        return this.applyOptimization(text, context);
+    }
+};
 ```
 
 ### 剪贴板支持

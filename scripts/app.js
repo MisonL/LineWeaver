@@ -68,9 +68,19 @@ function initializeModeSelector() {
 function handleModeChange() {
     const selectedMode = document.querySelector('input[name="processMode"]:checked')?.value;
     const customConfig = document.getElementById('customConfig');
+    const powershellConfig = document.getElementById('powershellConfig');
     
     if (customConfig) {
         customConfig.style.display = selectedMode === 'custom' ? 'block' : 'none';
+    }
+    
+    if (powershellConfig) {
+        powershellConfig.style.display = selectedMode === 'powershell' ? 'block' : 'none';
+    }
+    
+    // 更新PowerShell复制按钮的显示状态
+    if (Elements.powershellCopyBtn) {
+        Elements.powershellCopyBtn.style.display = selectedMode === 'powershell' ? 'inline-block' : 'none';
     }
     
     // 更新按钮文本
@@ -87,6 +97,7 @@ function updateConvertButtonText(mode) {
     const modeTexts = {
         'simple': '🔄 简单转换',
         'smart': '🧠 智能转换',
+        'powershell': '⚡ PowerShell转换',
         'custom': '🎨 自定义转换'
     };
     
@@ -101,6 +112,7 @@ function cacheElements() {
     Elements.outputText = document.getElementById('outputText');
     Elements.convertBtn = document.getElementById('convertBtn');
     Elements.copyBtn = document.getElementById('copyBtn');
+    Elements.powershellCopyBtn = document.getElementById('powershellCopyBtn');
     Elements.pasteBtn = document.getElementById('pasteBtn');
     Elements.urlInput = document.getElementById('urlInput');
     Elements.fetchUrlBtn = document.getElementById('fetchUrlBtn');
@@ -130,6 +142,11 @@ function bindEventListeners() {
     // 复制按钮点击事件
     if (Elements.copyBtn) {
         Elements.copyBtn.addEventListener('click', handleCopy);
+    }
+    
+    // PowerShell复制按钮点击事件
+    if (Elements.powershellCopyBtn) {
+        Elements.powershellCopyBtn.addEventListener('click', handlePowerShellCopy);
     }
     
     // 示例按钮点击事件
@@ -212,14 +229,34 @@ async function handleConvert() {
         const mode = document.querySelector('input[name="processMode"]:checked')?.value || 'simple';
         const config = getProcessingConfig(mode);
         
-        // 执行文本处理
+        // 执行文本处理 - 支持超长文本
         let processedText;
+        const isLargeText = inputText.length > 50000; // 5万字符以上视为大文本
+        
         try {
-            processedText = TextUtils.processTextByMode(inputText, mode, config);
+            if (isLargeText) {
+                // 显示进度条
+                showProgressIndicator();
+                
+                // 使用Web Worker或分块处理
+                processedText = await TextUtils.processTextWithWorker(
+                    inputText, 
+                    mode, 
+                    config,
+                    updateProgress
+                );
+            } else {
+                // 小文本使用原方法
+                processedText = TextUtils.processTextByMode(inputText, mode, config);
+            }
         } catch (processingError) {
             console.error('文本处理错误:', processingError);
             TextUtils.showToast(`处理文本时出现错误: ${processingError.message || '未知错误'}，请重试`, 'error');
             return;
+        } finally {
+            if (isLargeText) {
+                hideProgressIndicator();
+            }
         }
         
         // 检查处理后的文本是否为空
@@ -510,6 +547,19 @@ function getProcessingConfig(mode) {
         };
     }
     
+    if (mode === 'powershell') {
+        const preset = document.getElementById('powershellPreset')?.value || 'ai-cli';
+        const validate = document.getElementById('powershellValidate')?.checked || true;
+        const escape = document.getElementById('powershellEscape')?.checked || false;
+        
+        return {
+            mode: 'powershell',
+            preset: preset,
+            validate: validate,
+            escapeSpecial: escape
+        };
+    }
+    
     return {}; // 使用默认配置
 }
 
@@ -542,6 +592,44 @@ async function handleCopy() {
         
     } catch (error) {
         console.error('复制操作出错:', error);
+        handleCopyFailure();
+    } finally {
+        setCopyingState(false);
+    }
+}
+
+/**
+ * 处理PowerShell格式复制
+ */
+async function handlePowerShellCopy() {
+    if (AppState.isCopying || !AppState.outputText) {
+        return;
+    }
+    
+    try {
+        // 设置复制状态
+        setCopyingState(true);
+        
+        // 使用PowerShell格式处理
+        const powershellText = PowerShellUtils.processForPowerShellAI(AppState.outputText).text;
+        
+        // 执行复制操作
+        const success = await TextUtils.copyToClipboard(powershellText);
+        
+        if (success) {
+            // 显示成功状态
+            showCopySuccess();
+            
+            const textLength = powershellText.length;
+            const message = `已复制PowerShell格式文本（${textLength}字符）到剪贴板`;
+            TextUtils.showToast(message, 'success');
+        } else {
+            // 复制失败，提供备选方案
+            handleCopyFailure();
+        }
+        
+    } catch (error) {
+        console.error('PowerShell复制操作出错:', error);
         handleCopyFailure();
     } finally {
         setCopyingState(false);
@@ -969,9 +1057,11 @@ function extractTextFromHtml(html) {
             .replace(/\s+/g, ' ')  // 合并空白字符
             .trim();               // 去除首尾空白
         
-        // 如果内容太长，只取前15000个字符
-        if (text.length > 15000) {
-            text = text.substring(0, 15000) + '... (内容已截断)';
+        // 动态长度限制 - 基于设备性能
+        const maxWebLength = Math.floor(getMaxTextLength() * 0.8); // 网页内容使用80%限制
+        if (text.length > maxWebLength) {
+            const preview = text.substring(0, maxWebLength);
+            text = preview + `\n\n... (内容已截断，显示前${Math.floor(maxWebLength/1000)}K字符，完整内容共${Math.floor(text.length/1000)}K字符)`;
         }
         
         return text;
@@ -1032,6 +1122,70 @@ if (document.readyState === 'loading') {
     initializeApp();
 }
 
+/**
+ * 显示进度指示器
+ */
+function showProgressIndicator() {
+    // 创建进度条元素
+    if (!document.getElementById('progressIndicator')) {
+        const progressHtml = `
+            <div id="progressIndicator" class="progress-overlay">
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <h3>🔄 处理超长文本中...</h3>
+                        <p>正在使用高性能模式处理您的文本</p>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-info">
+                        <span id="progressText">准备中...</span>
+                        <span id="progressPercent">0%</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', progressHtml);
+    }
+    
+    const indicator = document.getElementById('progressIndicator');
+    indicator.style.display = 'flex';
+}
+
+/**
+ * 隐藏进度指示器
+ */
+function hideProgressIndicator() {
+    const indicator = document.getElementById('progressIndicator');
+    if (indicator) {
+        indicator.style.display = 'none';
+    }
+}
+
+/**
+ * 更新进度
+ * @param {number} progress - 进度百分比
+ * @param {number} current - 当前块
+ * @param {number} total - 总块数
+ */
+function updateProgress(progress, current, total) {
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const progressPercent = document.getElementById('progressPercent');
+    
+    if (progressFill) {
+        progressFill.style.width = `${progress}%`;
+    }
+    
+    if (progressText) {
+        progressText.textContent = `处理进度: ${current}/${total} 块`;
+    }
+    
+    if (progressPercent) {
+        progressPercent.textContent = `${progress}%`;
+    }
+}
+
 // 导出到全局作用域（用于调试）
 window.App = {
     state: AppState,
@@ -1039,5 +1193,8 @@ window.App = {
     handleConvert,
     handleCopy,
     clearAll,
-    updateUIState
+    updateUIState,
+    showProgressIndicator,
+    hideProgressIndicator,
+    updateProgress
 };
