@@ -75,54 +75,94 @@
                     
                     <!-- 自定义配置区域 -->
                     <div id="customConfig" class="custom-config">
-                        <div class="config-item">
-                            <label for="paragraphSeparator">段落分隔符:</label>
-                            <input type="text" id="paragraphSeparator" value="[PARA]" placeholder="如 [PARA], ||, ..." />
+                        <div class="config-header">
+                            <h3>🎨 高级自定义设置</h3>
+                            <p>精细控制文本处理效果</p>
                         </div>
-                        <div class="config-item">
-                            <label for="listSeparator">列表项分隔符:</label>
-                            <input type="text" id="listSeparator" value="[LIST]" placeholder="如 [LIST], →, ..." />
+                        
+                        <div class="config-grid">
+                            <!-- 分隔符设置 -->
+                            <div class="config-section">
+                                <h4>📋 分隔符设置</h4>
+                                <div class="config-item">
+                                    <label for="paragraphSeparator">段落分隔符</label>
+                                    <input type="text" id="paragraphSeparator" value="[PARA]" placeholder="如 [PARA], ||, ..." class="config-input" />
+                                    <small>用于标识段落边界</small>
+                                </div>
+                                <div class="config-item">
+                                    <label for="listSeparator">列表项分隔符</label>
+                                    <input type="text" id="listSeparator" value="[LIST]" placeholder="如 [LIST], →, ..." class="config-input" />
+                                    <small>用于标识列表项</small>
+                                </div>
+                            </div>
+                            
+                            <!-- 文本处理 -->
+                            <div class="config-section">
+                                <h4>📝 文本处理</h4>
+                                <div class="config-item">
+                                    <label for="lineBreakReplacement">换行符替换</label>
+                                    <select id="lineBreakReplacement" class="config-select">
+                                        <option value="space">空格</option>
+                                        <option value="empty">无</option>
+                                        <option value="custom">自定义</option>
+                                    </select>
+                                    <input type="text" id="customLineBreak" value=" " placeholder="自定义替换符" class="config-input custom-input" style="display: none;" />
+                                </div>
+                                <div class="config-item">
+                                    <label for="spaceHandling">空格处理</label>
+                                    <select id="spaceHandling" class="config-select">
+                                        <option value="preserve">保留原空格</option>
+                                        <option value="normalize">标准化空格</option>
+                                        <option value="remove">移除多余空格</option>
+                                    </select>
+                                </div>
+                                <div class="config-item">
+                                    <label for="indentationHandling">缩进处理</label>
+                                    <select id="indentationHandling" class="config-select">
+                                        <option value="remove">移除缩进</option>
+                                        <option value="preserve">保留缩进</option>
+                                        <option value="convert">转换为空格</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- 高级选项 -->
+                            <div class="config-section">
+                                <h4>⚙️ 高级选项</h4>
+                                <div class="config-item">
+                                    <label for="maxLineLength">最大行长</label>
+                                    <div class="input-group">
+                                        <input type="number" id="maxLineLength" value="0" min="0" max="10000" class="config-input number-input" />
+                                        <span class="input-unit">字符</span>
+                                    </div>
+                                    <small>0表示无限制</small>
+                                </div>
+                                <div class="config-item">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="preserveUrls" checked />
+                                        <span class="checkmark"></span>
+                                        保留URL格式
+                                    </label>
+                                </div>
+                                <div class="config-item">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="preserveCodeBlocks" />
+                                        <span class="checkmark"></span>
+                                        保留代码块
+                                    </label>
+                                </div>
+                                <div class="config-item">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="trimEdges" checked />
+                                        <span class="checkmark"></span>
+                                        去除首尾空格
+                                    </label>
+                                </div>
+                            </div>
                         </div>
-                        <div class="config-item">
-                            <label for="lineBreakReplacement">换行符替换:</label>
-                            <select id="lineBreakReplacement">
-                                <option value="space">空格</option>
-                                <option value="empty">无</option>
-                                <option value="custom">自定义</option>
-                            </select>
-                            <input type="text" id="customLineBreak" value=" " placeholder="自定义替换符" style="display: none; margin-left: 8px;" />
-                        </div>
-                        <div class="config-item">
-                            <label for="spaceHandling">空格处理:</label>
-                            <select id="spaceHandling">
-                                <option value="preserve">保留原空格</option>
-                                <option value="normalize">标准化空格</option>
-                                <option value="remove">移除多余空格</option>
-                            </select>
-                        </div>
-                        <div class="config-item">
-                            <label for="indentationHandling">缩进处理:</label>
-                            <select id="indentationHandling">
-                                <option value="remove">移除缩进</option>
-                                <option value="preserve">保留缩进</option>
-                                <option value="convert">转换为空格</option>
-                            </select>
-                        </div>
-                        <div class="config-item">
-                            <label for="maxLineLength">最大行长:</label>
-                            <input type="number" id="maxLineLength" value="0" min="0" placeholder="0=无限制" />
-                        </div>
-                        <div class="config-item">
-                            <label for="preserveUrls">保留URL格式:</label>
-                            <input type="checkbox" id="preserveUrls" checked />
-                        </div>
-                        <div class="config-item">
-                            <label for="preserveCodeBlocks">保留代码块:</label>
-                            <input type="checkbox" id="preserveCodeBlocks" />
-                        </div>
-                        <div class="config-item">
-                            <label for="trimEdges">去除首尾空格:</label>
-                            <input type="checkbox" id="trimEdges" checked />
+                        
+                        <div class="config-footer">
+                            <small>💡 提示：调整参数后，转换结果会实时更新</small>
                         </div>
                     </div>
                 </section>

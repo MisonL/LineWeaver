@@ -53,8 +53,6 @@ function initializeApp() {
         
         // 模式选择器
         const modeRadios = document.querySelectorAll('input[name="processMode"]');
-        console.log('找到模式选择器:', modeRadios.length);
-        
         modeRadios.forEach(radio => {
             radio.addEventListener('change', handleModeChange);
         });
@@ -65,11 +63,16 @@ function initializeApp() {
             lineBreakSelect.addEventListener('change', handleLineBreakChange);
         }
         
+        // 所有配置项变化监听
+        const configInputs = document.querySelectorAll('#customConfig input, #customConfig select');
+        configInputs.forEach(input => {
+            input.addEventListener('change', updateConfigPreview);
+            input.addEventListener('input', updateConfigPreview);
+        });
+        
         // 初始化显示状态
-        setTimeout(() => {
-            handleModeChange();
-            handleLineBreakChange();
-        }, 100);
+        handleModeChange();
+        handleLineBreakChange();
     }
 
 /**
@@ -79,11 +82,14 @@ function handleModeChange() {
     const selectedMode = document.querySelector('input[name="processMode"]:checked')?.value || 'smart';
     const customConfig = document.getElementById('customConfig');
     
-    console.log('Mode changed to:', selectedMode);
-    
     if (customConfig) {
-        customConfig.style.display = selectedMode === 'custom' ? 'block' : 'none';
-        console.log('Custom config display:', selectedMode === 'custom' ? 'block' : 'none');
+        if (selectedMode === 'custom') {
+            customConfig.style.display = 'block';
+            customConfig.classList.add('active');
+        } else {
+            customConfig.style.display = 'none';
+            customConfig.classList.remove('active');
+        }
     }
     
     // 更新按钮文本
@@ -99,13 +105,27 @@ function handleLineBreakChange() {
     
     if (lineBreakSelect && customLineBreak) {
         const showCustom = lineBreakSelect.value === 'custom';
-        customLineBreak.style.display = showCustom ? 'inline-block' : 'none';
+        customLineBreak.style.display = showCustom ? 'block' : 'none';
         
-        // 如果显示自定义输入框，自动聚焦
+        // 添加平滑过渡效果
         if (showCustom) {
-            customLineBreak.focus();
+            setTimeout(() => {
+                customLineBreak.focus();
+                customLineBreak.select();
+            }, 100);
         }
     }
+}
+
+/**
+ * 实时预览配置效果
+ */
+function updateConfigPreview() {
+    const config = getProcessingConfig('custom');
+    console.log('配置更新:', config);
+    
+    // 可以在这里添加实时预览功能
+    // 例如：显示当前配置的摘要
 }
 
     function updateConvertButtonText(mode) {
