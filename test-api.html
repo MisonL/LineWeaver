@@ -3,34 +3,312 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LineWeaver API 测试页面</title>
+    <title>🧪 LineWeaver API 测试中心</title>
+    <link rel="stylesheet" href="./styles/enhanced.css">
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
-        .result { margin: 10px 0; padding: 10px; background: #f5f5f5; border-radius: 3px; }
-        .success { background: #d4edda; color: #155724; }
-        .error { background: #f8d7da; color: #721c24; }
-        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        :root {
+            --test-primary: #3b82f6;
+            --test-success: #22c55e;
+            --test-error: #ef4444;
+            --test-warning: #f59e0b;
+            --test-bg: #f8fafc;
+            --test-card: #ffffff;
+            --test-border: #e2e8f0;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--test-bg) 0%, #e0f2fe 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .test-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            background: var(--test-card);
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--test-border);
+        }
+
+        .test-header h1 {
+            color: var(--test-primary);
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .test-header p {
+            color: #64748b;
+            font-size: 1.1rem;
+        }
+
+        .test-grid {
+            display: grid;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .test-card {
+            background: var(--test-card);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--test-border);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .test-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .test-card h2 {
+            color: var(--test-primary);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .test-controls {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .test-btn {
+            background: var(--test-primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .test-btn:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .test-btn:active {
+            transform: translateY(0);
+        }
+
+        .test-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 1rem;
+            border: 2px solid var(--test-border);
+            border-radius: 0.75rem;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            resize: vertical;
+            transition: border-color 0.2s ease;
+            background: #fafbfc;
+        }
+
+        .test-textarea:focus {
+            outline: none;
+            border-color: var(--test-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .test-results {
+            margin-top: 1rem;
+        }
+
+        .test-result {
+            margin: 0.5rem 0;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            border-left: 4px solid;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .test-result.success {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            border-color: var(--test-success);
+            color: #166534;
+        }
+
+        .test-result.error {
+            background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
+            border-color: var(--test-error);
+            color: #991b1b;
+        }
+
+        .test-result.info {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-color: var(--test-primary);
+            color: #1e40af;
+        }
+
+        .test-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .test-stat {
+            background: #f1f5f9;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+        }
+
+        .test-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--test-primary);
+        }
+
+        .test-stat-label {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-top: 0.25rem;
+        }
+
+        .nav-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--test-primary);
+            text-decoration: none;
+            margin-bottom: 2rem;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border: 2px solid var(--test-primary);
+            border-radius: 0.75rem;
+            background: white;
+            transition: all 0.2s ease;
+        }
+
+        .nav-back:hover {
+            background: var(--test-primary);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .test-header h1 {
+                font-size: 2rem;
+            }
+            
+            .test-controls {
+                flex-direction: column;
+            }
+            
+            .test-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>🧪 LineWeaver 前端API测试</h1>
-    
-    <div class="test-section">
-        <h2>API功能测试</h2>
-        <button onclick="testConvertAPI()">测试文本转换API</button>
-        <button onclick="testHealthAPI()">测试健康检查API</button>
-        <button onclick="testAllAPIs()">测试所有API</button>
+    <div class="test-container">
+        <a href="./" class="nav-back">← 返回主页面</a>
         
-        <div id="results"></div>
-    </div>
+        <div class="test-header">
+            <h1>🧪 LineWeaver API 测试中心</h1>
+            <p>纯前端API功能验证与性能测试</p>
+        </div>
 
-    <div class="test-section">
-        <h2>测试数据</h2>
-        <textarea id="testText" rows="4" cols="50">Hello
+        <div class="test-grid">
+            <div class="test-card">
+                <h2>🔄 文本转换测试</h2>
+                <div class="test-controls">
+                    <button class="test-btn" onclick="testConvertAPI()">
+                        <span>📝</span> 测试转换
+                    </button>
+                    <button class="test-btn" onclick="testConvertAPI('simple')">
+                        <span>⚡</span> 简单模式
+                    </button>
+                    <button class="test-btn" onclick="testConvertAPI('smart')">
+                        <span>🧠</span> 智能模式
+                    </button>
+                </div>
+                <textarea id="testText" class="test-textarea" placeholder="输入测试文本，包含换行符...">Hello
 World
 This is a test
-with multiple lines</textarea>
+with multiple lines
+and various
+formatting styles</textarea>
+                <div class="test-results" id="convertResults"></div>
+            </div>
+
+            <div class="test-card">
+                <h2>🏥 系统状态</h2>
+                <div class="test-controls">
+                    <button class="test-btn" onclick="testHealthAPI()">
+                        <span>🏥</span> 健康检查
+                    </button>
+                    <button class="test-btn" onclick="testVersionAPI()">
+                        <span>📊</span> 版本信息
+                    </button>
+                    <button class="test-btn" onclick="testAllAPIs()">
+                        <span>🧪</span> 全面测试
+                    </button>
+                </div>
+                <div class="test-results" id="systemResults"></div>
+            </div>
+
+            <div class="test-card">
+                <h2>📋 性能统计</h2>
+                <div class="test-controls">
+                    <button class="test-btn" onclick="testStatsAPI()">
+                        <span>📈</span> 获取统计
+                    </button>
+                    <button class="test-btn" onclick="testExampleAPI()">
+                        <span>💡</span> 获取示例
+                    </button>
+                    <button class="test-btn" onclick="clearResults()">
+                        <span>🗑️</span> 清空结果
+                    </button>
+                </div>
+                <div class="test-results" id="statsResults"></div>
+            </div>
+        </div>
+
+        <div class="test-card">
+            <h2>🎯 实时结果</h2>
+            <div id="results" class="test-results"></div>
+        </div>
     </div>
 
     <script src="scripts/smart-mode.js"></script>
