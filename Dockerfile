@@ -19,6 +19,7 @@ RUN rm -rf /usr/share/nginx/html/*
 # 复制项目文件到 nginx 默认目录
 COPY index.html ./
 COPY api-docs.html ./
+COPY test-api.html ./
 COPY README.md ./
 COPY favicon.ico ./
 COPY scripts/ ./scripts/
