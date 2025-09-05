@@ -33,9 +33,9 @@ This is a test
 with multiple lines</textarea>
     </div>
 
-    <script src="scripts/api-client.js"></script>
     <script src="scripts/smart-mode.js"></script>
     <script src="scripts/utils.js"></script>
+    <script src="scripts/api-client.js"></script>
     <script>
         const resultsDiv = document.getElementById('results');
         
@@ -52,9 +52,16 @@ with multiple lines</textarea>
             
             try {
                 const testText = document.getElementById('testText').value;
-                const result = window.apiClient.convertText(testText, 'smart');
+                const result = window.LineWeaverAPI.processText(testText, {
+                    lineBreakReplacement: 'space',
+                    spaceHandling: 'normalize'
+                });
                 
-                addResult(`✅ 转换成功！<br>原始文本: ${testText.length}字符<br>转换后: ${result.convertedText.length}字符<br>结果: "${result.convertedText.substring(0, 50)}..."`, 'success');
+                if (result.success) {
+                    addResult(`✅ 转换成功！<br>原始文本: ${testText.length}字符<br>转换后: ${result.data.length}字符<br>结果: "${result.data.substring(0, 50)}..."`, 'success');
+                } else {
+                    addResult(`❌ 转换失败: ${result.error.message}`, 'error');
+                }
             } catch (error) {
                 addResult(`❌ 转换失败: ${error.message}`, 'error');
             }
@@ -65,8 +72,12 @@ with multiple lines</textarea>
             addResult('🏥 测试健康检查API...');
             
             try {
-                const health = window.apiClient.health();
-                addResult(`✅ 健康检查正常！<br>状态: ${health.status}<br>版本: ${health.version}`, 'success');
+                const health = window.LineWeaverAPI.getHealth();
+                if (health.success) {
+                    addResult(`✅ 健康检查正常！<br>状态: ${health.data.status}<br>版本: ${health.data.version}<br>运行时间: ${health.data.uptime}`, 'success');
+                } else {
+                    addResult(`❌ 健康检查失败: ${health.error.message}`, 'error');
+                }
             } catch (error) {
                 addResult(`❌ 健康检查失败: ${error.message}`, 'error');
             }
@@ -77,16 +88,20 @@ with multiple lines</textarea>
             addResult('🧪 开始全面API测试...');
             
             const tests = [
-                { name: '文本转换', fn: () => window.apiClient.convertText('test\ntext', 'smart') },
-                { name: '健康检查', fn: () => window.apiClient.health() },
-                { name: '获取统计', fn: () => window.apiClient.getStats() },
-                { name: '获取示例', fn: () => window.apiClient.getExample() }
+                { name: '文本转换', fn: () => window.LineWeaverAPI.processText('test\ntext', {lineBreakReplacement: 'space'}) },
+                { name: '健康检查', fn: () => window.LineWeaverAPI.getHealth() },
+                { name: '获取版本', fn: () => window.LineWeaverAPI.getVersion() },
+                { name: '获取文档', fn: () => window.LineWeaverAPI.getAPIDocs() }
             ];
             
             tests.forEach(test => {
                 try {
                     const result = test.fn();
-                    addResult(`✅ ${test.name}: 正常`, 'success');
+                    if (result.success) {
+                        addResult(`✅ ${test.name}: 正常`, 'success');
+                    } else {
+                        addResult(`❌ ${test.name}: ${result.error.message}`, 'error');
+                    }
                 } catch (error) {
                     addResult(`❌ ${test.name}: ${error.message}`, 'error');
                 }
@@ -97,13 +112,17 @@ with multiple lines</textarea>
         window.addEventListener('load', () => {
             addResult('🔍 检测前端API可用性...');
             
-            if (typeof window.apiClient !== 'undefined') {
+            if (typeof window.LineWeaverAPI !== 'undefined') {
                 addResult('✅ 前端API客户端已加载', 'success');
                 
                 // 测试基本功能
                 try {
-                    const test = window.apiClient.convertText('test', 'simple');
-                    addResult('✅ 基本API功能正常', 'success');
+                    const test = window.LineWeaverAPI.processText('test\ntext');
+                    if (test.success) {
+                        addResult('✅ 基本API功能正常', 'success');
+                    } else {
+                        addResult(`⚠️  API功能测试失败: ${test.error.message}`, 'error');
+                    }
                 } catch (e) {
                     addResult('⚠️  API功能测试失败: ' + e.message, 'error');
                 }
