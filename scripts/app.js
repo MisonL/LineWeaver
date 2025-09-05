@@ -83,26 +83,22 @@ function handleModeChange() {
         Elements.powershellCopyBtn.style.display = selectedMode === 'powershell' ? 'inline-block' : 'none';
     }
     
-    // 更新按钮文本
+    // 更新转换按钮文本（静态）
     updateConvertButtonText(selectedMode);
 }
 
-/**
- * 更新转换按钮文本
- */
-function updateConvertButtonText(mode) {
-    const convertBtnText = Elements.convertBtnText;
-    if (!convertBtnText) return;
-    
-    const modeTexts = {
-        'simple': '🔄 简单转换',
-        'smart': '🧠 智能转换',
-        'powershell': '⚡ PowerShell转换',
-        'custom': '🎨 自定义转换'
-    };
-    
-    convertBtnText.textContent = modeTexts[mode] || '转换文本';
-}
+    function updateConvertButtonText(mode) {
+        const buttonText = Elements.convertBtnText;
+        if (!buttonText) return;
+        
+        const texts = {
+            simple: '🔄 简单转换',
+            smart: '🧠 智能转换',
+            custom: '🎨 自定义转换'
+        };
+        
+        buttonText.textContent = texts[mode] || '🔄 转换';
+    }
 
 /**
  * 缓存DOM元素引用

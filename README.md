@@ -8,6 +8,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![GitHub stars](https://img.shields.io/github/stars/MisonL/LineWeaver.svg?style=social&label=Star)](https://github.com/MisonL/LineWeaver)
+[![Version](https://img.shields.io/badge/version-v2.2.1-green.svg)](CHANGELOG.md)
 
 [**🚀 在线体验**](https://misonl.github.io/LineWeaver/) | [**📚 使用指南**](#使用指南) | [**📝 变更记录**](CHANGELOG.md) | [**💬 问题反馈**](https://github.com/MisonL/LineWeaver/issues)
 

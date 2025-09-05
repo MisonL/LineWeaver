@@ -5,41 +5,49 @@
  */
 
 /**
- * 统一智能配置
+ * 统一智能配置 - GitHub Pages优化版本
  */
-const UnifiedSmartConfig = {
-    // 单一智能模式配置
-    defaults: {
-        autoDetect: true,
-        maxLineLength: 500,
-        encoding: 'utf8',
-        
-        // PowerShell集成参数
-        powerShellOptimization: true,
-        escapePowerShellChars: true,
-        useBacktickForNewlines: true,
-        
-        // 通用处理参数
-        preserveStructure: true,
-        preserveIndentation: false,
-        compressionLevel: 'balanced',
-        semanticAnalysis: true,
-        validation: true
-    },
+const PRECOMPILED_PATTERNS = {
+    powerShell: [
+        /^\$\w+/,
+        /^\w+-\w+/,
+        /\|\s*\w+/,
+        />\s*\w+/,
+        /`\w+/,
+        /@["'].*["']@/
+    ],
+    textTypes: {
+        code: /^(function|def|class|import|const|let|var|public|private|static)\s+/m,
+        markdown: /^#{1,6}\s|^```|^[-*+]\s/m,
+        list: /^\s*[-*+]\s|^\s*\d+\.\s/m
+    }
+};
+
+const DEFAULT_CONFIG = Object.freeze({
+    autoDetect: true,
+    maxLineLength: 500,
+    powerShellOptimization: true,
+    escapePowerShellChars: true,
+    useBacktickForNewlines: true,
+    preserveStructure: true,
+    preserveIndentation: false,
+    compressionLevel: 'balanced',
+    semanticAnalysis: true,
+    validation: true
+});
+
+// 简单LRU缓存（静态部署兼容）
+const SIMPLE_CACHE = {
+    store: new Map(),
+    maxSize: 50,
     
-    // 上下文检测规则
-    contextRules: {
-        powerShellContext: {
-            triggers: ['powershell', 'ps1', 'cli', 'command', 'script'],
-            patterns: [
-                /^\$\w+/,           // PowerShell变量
-                /^\w+-\w+/,        // PowerShell命令格式
-                /\|\s*\w+/,        // 管道操作
-                />\s*\w+/,         // 重定向
-                /`\w+/,            // 反引号转义
-                /@["'].*["']@/     // Here-string
-            ]
+    get(key) { return this.store.get(key); },
+    set(key, value) {
+        if (this.store.size >= this.maxSize) {
+            const firstKey = this.store.keys().next().value;
+            this.store.delete(firstKey);
         }
+        this.store.set(key, value);
     }
 };
 
@@ -48,41 +56,44 @@ const UnifiedSmartConfig = {
  */
 class UnifiedSmartProcessor {
     constructor(config = {}) {
-        this.config = { ...UnifiedSmartConfig.defaults, ...config };
+        this.config = Object.assign({}, DEFAULT_CONFIG, config);
     }
     
     /**
-     * 主处理函数 - 完全合并的智能处理
+     * 主处理函数 - GitHub Pages优化版本
      */
     process(text, overrideConfig = {}) {
-        const config = { ...this.config, ...overrideConfig };
+        // 缓存检查
+        const cacheKey = text.slice(0, 100) + JSON.stringify(overrideConfig);
+        const cached = SIMPLE_CACHE.get(cacheKey);
+        if (cached) return cached;
+        
+        const config = Object.assign({}, this.config, overrideConfig);
         
         if (!text || text.trim() === '') {
-            return this.createResult('', text, config);
+            const result = this.createResult('', text, config);
+            SIMPLE_CACHE.set(cacheKey, result);
+            return result;
         }
         
         let processed = text;
         
         try {
-            // 1. 上下文分析
+            // 采样优化：限制检测范围
             const context = this.analyzeContext(processed);
-            
-            // 2. 智能预处理
             processed = this.preprocess(processed, config, context);
-            
-            // 3. 统一核心处理（包含PowerShell优化）
             processed = this.coreProcess(processed, config, context);
-            
-            // 4. 智能后处理
             processed = this.postprocess(processed, config, context);
-            
-            // 5. 统一验证
             const validation = this.validate(processed, config, context);
             
-            return this.createResult(processed, text, config, validation, context);
+            const result = this.createResult(processed, text, config, validation, context);
+            SIMPLE_CACHE.set(cacheKey, result);
+            return result;
             
         } catch (error) {
-            return this.createResult(text, text, config, { isValid: false, error: error.message });
+            const result = this.createResult(text, text, config, { isValid: false, error: error.message });
+            SIMPLE_CACHE.set(cacheKey, result);
+            return result;
         }
     }
     
@@ -116,21 +127,22 @@ class UnifiedSmartProcessor {
     }
     
     /**
-     * 计算PowerShell上下文得分
+     * 计算PowerShell上下文得分 - GitHub Pages优化
      */
     calculatePowerShellScore(text) {
+        // 采样优化：限制检测范围到前2000字符
+        const sample = text.slice(0, Math.min(text.length, 2000));
         let score = 0;
-        const rules = UnifiedSmartConfig.contextRules.powerShellContext;
         
-        // 检查PowerShell特定模式
-        rules.patterns.forEach(pattern => {
-            if (pattern.test(text)) {
+        // 使用预编译的正则表达式
+        PRECOMPILED_PATTERNS.powerShell.forEach(pattern => {
+            if (pattern.test(sample)) {
                 score += 0.2;
             }
         });
         
-        // 检查特殊字符密度
-        const specialChars = text.match(/[$|><&"'`]/g);
+        // 优化特殊字符检测
+        const specialChars = sample.match(/[$|><&"'`]/g);
         if (specialChars) {
             score += Math.min(specialChars.length * 0.05, 0.3);
         }
@@ -139,28 +151,29 @@ class UnifiedSmartProcessor {
     }
     
     /**
-     * 文本类型检测
+     * 终端命令特征检测
+     * 检测是否为终端命令格式
      */
     detectTextType(text) {
-        // 代码检测
-        if (/^(function|def|class|import|const|let|var|public|private|static)\s+/m.test(text) ||
-            /^(#!\/|#include|using|namespace|package)\s/m.test(text) ||
-            /^(\s{4,}|\t).*\w+\s*\(/m.test(text)) {
-            return 'code';
-        }
+        const sample = text.slice(0, Math.min(text.length, 1000));
         
-        // Markdown检测
-        if (/^#{1,6}\s/m.test(text) || /^\s*[-*+]\s/m.test(text) || /^```/m.test(text)) {
-            return 'markdown';
-        }
+        // 终端命令特征检测
+        const terminalIndicators = [
+            /^\$\w+/,                    // 变量定义
+            /^\w+-\w+/,                 // 命令格式
+            /\|\s*\w+/,                 // 管道操作
+            />\s*\w+/,                  // 重定向
+            /\.sh|\.bat|\.cmd/,         // 脚本文件扩展名
+            /get-|set-|write-|read-/i   // 命令动词
+        ];
         
-        // 列表检测
-        if (/^\s*[-*+]\s/m.test(text) || /^\s*\d+\.\s/m.test(text)) {
-            return 'list';
-        }
+        let score = 0;
+        terminalIndicators.forEach(pattern => {
+            if (pattern.test(sample)) score += 0.25;
+        });
         
-        return 'plain';
-    }
+        return score > 0.3 ? 'terminal' : 'plain';
+ }
     
     /**
      * 预处理
@@ -182,109 +195,81 @@ class UnifiedSmartProcessor {
     }
     
     /**
-     * 统一核心处理（完全合并PowerShell功能）
+     * PowerShell CLI核心处理
+     * 专注于将文本转换为适合PowerShell终端粘贴的格式
      */
     coreProcess(text, config, context) {
         let processed = text;
         
-        // 根据上下文自动应用PowerShell优化
-        if (context.powerShellContext && config.escapePowerShellChars) {
-            processed = this.applyPowerShellOptimization(processed);
-        }
-        
-        // 根据文本类型处理
-        switch (context.type) {
-            case 'code':
-                processed = this.processCode(processed, config);
-                break;
-            case 'markdown':
-                processed = this.processMarkdown(processed, config);
-                break;
-            case 'list':
-                processed = this.processList(processed, config);
-                break;
-            default:
-                processed = this.processPlain(processed, config);
+        // 始终应用PowerShell优化，确保适合终端粘贴
+        if (config.powerShellOptimization) {
+            processed = this.applyTerminalOptimization(processed);
+        } else {
+            // 基础单行处理
+            processed = processed.replace(/\r\n/g, ' ').replace(/\n/g, ' ').replace(/\r/g, ' ');
+            processed = processed.replace(/\s+/g, ' ').trim();
         }
         
         return processed;
-    }
+ }
     
     /**
-     * PowerShell优化处理（完全集成）
+     * PowerShell CLI粘贴优化 - 核心功能
+     * 将任意文本转换为适合PowerShell终端粘贴的单行命令
      */
-    applyPowerShellOptimization(text) {
-        let processed = text;
+    applyTerminalOptimization(text) {
+        // 1. 移除所有换行符，强制单行
+        let processed = text.replace(/\n/g, ' ').replace(/\r/g, ' ');
         
-        // PowerShell特殊字符转义
+        // 2. 合并多余空格
+        processed = processed.replace(/\s+/g, ' ').trim();
+        
+        // 3. 终端特殊字符转义
         const escapeMap = {
-            '$': '`$',
-            '|': '`|',
-            '>': '`>',
-            '<': '`<',
-            '&': '`&',
-            '(': '`(',
-            ')': '`)',
-            '{': '`{',
-            '}': '`}',
-            '[': '`[',
-            ']': '`]',
-            '"': '""',
-            "'": "''",
-            '`': '``'
+            '"': '""',           // 双引号转义
+            "'": "''",           // 单引号转义
+            '`': '``',           // 反引号转义
+            '$': '`$',           // 变量符号转义
+            '|': '`|',           // 管道符转义
+            '>': '`>',           // 重定向转义
+            '<': '`<',           // 输入重定向转义
+            '&': '`&',           // 后台运行转义
+            '(': '`(',           // 括号转义
+            ')': '`)',           // 括号转义
+            '{': '`{',           // 大括号转义
+            '}': '`}',           // 大括号转义
+            '[': '`[',           // 中括号转义
+            ']': '`]',           // 中括号转义
+            '#': '`#',           // 注释符号转义
+            ';': '`;'            // 分号转义
         };
         
-        processed = processed.replace(/[$|><&(){}[\]"'`]/g, char => escapeMap[char] || char);
+        // 4. 转义特殊字符
+        processed = processed.replace(/["'`$|><&(){}[\]#;]/g, char => escapeMap[char] || char);
         
-        // 换行符处理
-        if (UnifiedSmartConfig.defaults.useBacktickForNewlines) {
-            processed = processed.replace(/\n/g, '`n');
-        }
-        
-        return processed;
+        // 5. 确保适合终端粘贴（去除首尾空格）
+        return processed.trim();
     }
     
     /**
-     * 代码处理
+     * PowerShell CLI专用处理函数
+     * 所有文本统一处理为适合PowerShell终端粘贴的格式
      */
     processCode(text, config) {
-        let processed = text;
-        
-        if (config.preserveIndentation) {
-            processed = processed.replace(/\t/g, '    ');
-        }
-        
-        return processed;
+        return this.applyTerminalOptimization(text);
     }
     
-    /**
-     * Markdown处理
-     */
     processMarkdown(text, config) {
-        return text; // 保持Markdown格式
+        return this.applyTerminalOptimization(text);
     }
     
-    /**
-     * 列表处理
-     */
     processList(text, config) {
-        return text; // 保持列表格式
+        return this.applyPowerShellOptimization(text);
     }
     
-    /**
-     * 普通文本处理
-     */
     processPlain(text, config) {
-        let processed = text;
-        
-        // 智能分段
-        if (config.maxLineLength && processed.length > config.maxLineLength) {
-            const sentences = processed.match(/[^.!?。！？]+[.!?。！？]+/g) || [processed];
-            processed = sentences.join(' ');
-        }
-        
-        return processed;
-    }
+        return this.applyPowerShellOptimization(text);
+ }
     
     /**
      * 后处理
@@ -361,9 +346,9 @@ const SmartMode = {
     },
     
     /**
-     * 快速PowerShell处理（向后兼容）
+     * 快速终端处理（向后兼容）
      */
-    processForPowerShell(text) {
+    processForTerminal(text) {
         return this.processor.process(text, {
             powerShellOptimization: true,
             escapePowerShellChars: true,
@@ -399,9 +384,9 @@ const SmartMode = {
 /**
  * 向后兼容API
  */
-const PowerShellUtils = {
-    processForPowerShellAI: (text) => SmartMode.processForPowerShell(text),
-    validatePowerShellCompatibility: (text) => {
+const TerminalUtils = {
+    processForTerminalAI: (text) => SmartMode.processForTerminal(text),
+    validateTerminalCompatibility: (text) => {
         const result = SmartMode.process(text);
         return {
             isValid: result.validation.isValid,
@@ -413,13 +398,28 @@ const PowerShellUtils = {
 
 // 导出到全局作用域
 window.SmartMode = SmartMode;
-window.PowerShellUtils = PowerShellUtils;
+window.TerminalUtils = TerminalUtils;
 
 // 开发环境自动初始化
 if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-    console.log('🧠 统一智能模式已加载');
+    console.log('🧠 LineWeaver 已加载');
     console.log('使用方式:');
     console.log('- SmartMode.process(text) - 统一智能处理');
-    console.log('- SmartMode.processForPowerShell(text) - PowerShell优化');
+    console.log('- SmartMode.processForTerminal(text) - 终端优化');
     console.log('- SmartMode.detectContext(text) - 上下文检测');
+    console.log('- SmartMode.benchmark(text) - 性能测试（开发环境）');
+    
+    // 添加性能测试方法（开发环境）
+    SmartMode.benchmark = function(text, iterations = 1000) {
+        const start = performance.now();
+        for (let i = 0; i < iterations; i++) {
+            SmartMode.process(text);
+        }
+        const end = performance.now();
+        return {
+            totalTime: end - start,
+            averageTime: (end - start) / iterations,
+            opsPerSecond: Math.round(iterations / ((end - start) / 1000))
+        };
+    };
 }

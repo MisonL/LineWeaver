@@ -1,0 +1,114 @@
+/* 完全静态的样式 - 无动画版本 */
+
+/* 模式选择器 - 静态 */
+.mode-selector {
+    display: flex;
+    gap: 8px;
+    padding: 4px;
+    background: #f3f4f6;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.mode-selector label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    flex: 1;
+    justify-content: center;
+    text-align: center;
+    border: 1px solid transparent;
+}
+
+.mode-selector label:hover {
+    background: #ffffff;
+    border-color: #d1d5db;
+}
+
+.mode-selector input[type="radio"] {
+    display: none;
+}
+
+.mode-selector input[type="radio"]:checked + .mode-label {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border-color: #60a5fa;
+    font-weight: 600;
+    border-width: 2px;
+}
+
+/* 按钮 - 静态 */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.btn-primary {
+    background: #3b82f6;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2563eb;
+}
+
+.btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+
+.btn-secondary:hover {
+    background: #e5e7eb;
+}
+
+.btn-text, .btn-loading, .btn-success {
+    display: inline-block;
+}
+
+.btn-loading {
+    display: none;
+}
+
+.btn-success {
+    display: none;
+}
+
+.btn.loading .btn-text {
+    display: none;
+}
+
+.btn.loading .btn-loading {
+    display: inline-block;
+}
+
+.btn.success .btn-text {
+    display: none;
+}
+
+.btn.success .btn-success {
+    display: inline-block;
+}
+
+.spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    display: inline-block;
+}
