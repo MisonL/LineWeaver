@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LineWeaver API 文档 - 纯前端RESTful接口</title>
+    <link rel="stylesheet" href="./styles/enhanced.css">
+    <link rel="icon" href="./favicon.ico">
+    <style>
+        .api-docs {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+        .api-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--primary-50) 0%, var(--gray-50) 100%);
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+        }
+        .endpoint {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            margin: 1.5rem 0;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+        .endpoint-header {
+            padding: 1.5rem;
+            background: var(--gray-50);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .method-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: white;
+            min-width: 60px;
+            text-align: center;
+        }
+        .method-post { background: var(--primary-600); }
+        .method-get { background: var(--success-600); }
+        .endpoint-body {
+            padding: 1.5rem;
+        }
+        .code-block {
+            background: var(--gray-900);
+            color: var(--gray-100);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid var(--primary-500);
+        }
+        .response-example {
+            background: var(--gray-50);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            border-left: 4px solid var(--success-500);
+        }
+        .nav-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary-600);
+            text-decoration: none;
+            margin-bottom: 2rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            background: white;
+            transition: all 0.2s ease;
+        }
+        .nav-back:hover {
+            color: var(--primary-700);
+            background: var(--primary-50);
+            transform: translateY(-1px);
+        }
+        .section-title {
+            color: var(--text-primary);
+            margin: 2rem 0 1rem 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        .description {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+        .parameter-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        .parameter-table th,
+        .parameter-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        .parameter-table th {
+            background: var(--gray-50);
+            font-weight: 600;
+        }
+        .note {
+            background: var(--warning-50);
+            border: 1px solid var(--warning-200);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="api-docs">
+        <a href="./" class="nav-back">← 返回工具</a>
+        
+        <div class="api-header">
+            <h1>📚 LineWeaver API 文档</h1>
+            <p>纯前端RESTful接口，完全兼容GitHub Pages部署</p>
+            <p class="description">无需后端服务器，所有API调用都在浏览器中完成</p>
+        </div>
+
+        <div class="section-title">🚀 快速开始</div>
+        <p>所有API都是纯前端实现，直接在浏览器中使用：</p>
+        <div class="code-block">
+// 使用示例
+const result = await window.apiClient.convertText('示例文本', 'smart');
+console.log(result.convertedText);
+        </div>
+
+        <div class="section-title">📋 API端点</div>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method-badge method-post">POST</span>
+                <code>/api/v1/convert</code>
+                <span>文本转换接口</span>
+            </div>
+            <div class="endpoint-body">
+                <div class="description">将多行文本转换为单行文本，支持多种处理模式</div>
+                
+                <h4>请求参数</h4>
+                <table class="parameter-table">
+                    <thead>
+                        <tr>
+                            <th>参数</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>text</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>需要转换的原始文本</td>
+                        </tr>
+                        <tr>
+                            <td>mode</td>
+                            <td>string</td>
+                            <td>否</td>
+                            <td>处理模式：simple, smart, custom（默认：smart）</td>
+                        </tr>
+                        <tr>
+                            <td>config</td>
+                            <td>object</td>
+                            <td>否</td>
+                            <td>自定义配置参数（仅在custom模式下使用）</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4>请求示例</h4>
+                <div class="code-block">
+{
+  "text": "这是\n一段\n多行\n文本",
+  "mode": "smart",
+  "config": {
+    "lineBreakReplacement": " ",
+    "spaceHandling": "preserve",
+    "trimEdges": true
+  }
+}
+                </div>
+                
+                <h4>响应示例</h4>
+                <div class="response-example">
+                    <strong>成功响应 (200):</strong>
+                    <div class="code-block">
+{
+  "success": true,
+  "data": {
+    "originalText": "这是\n一段\n多行\n文本",
+    "convertedText": "这是一段多行文本",
+    "stats": {
+      "originalLength": 20,
+      "convertedLength": 15,
+      "linesRemoved": 3,
+      "wordsCount": 5
+    }
+  }
+}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method-badge method-get">GET</span>
+                <code>/api/v1/health</code>
+                <span>健康检查</span>
+            </div>
+            <div class="endpoint-body">
+                <div class="description">检查API服务状态</div>
+                
+                <h4>响应示例</h4>
+                <div class="response-example">
+                    <div class="code-block">
+{
+  "status": "ok",
+  "version": "2.3.0",
+  "timestamp": "2025-09-05T12:00:00Z",
+  "message": "服务运行正常"
+}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method-badge method-post">POST</span>
+                <code>/api/v1/fetch-url</code>
+                <span>获取网页内容</span>
+            </div>
+            <div class="endpoint-body">
+                <div class="description">获取网页内容并转换为Markdown格式</div>
+                
+                <h4>请求参数</h4>
+                <table class="parameter-table">
+                    <thead>
+                        <tr>
+                            <th>参数</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>url</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>要获取的网页URL</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4>请求示例</h4>
+                <div class="code-block">
+{
+  "url": "https://example.com/article"
+}
+                </div>
+                
+                <h4>响应示例</h4>
+                <div class="response-example">
+                    <div class="code-block">
+{
+  "success": true,
+  "data": {
+    "content": "# 文章标题\n\n这是文章内容...",
+    "title": "文章标题",
+    "url": "https://example.com/article",
+    "wordCount": 150
+  }
+}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method-badge method-get">GET</span>
+                <code>/api/v1/stats</code>
+                <span>使用统计</span>
+            </div>
+            <div class="endpoint-body">
+                <div class="description">获取工具使用统计信息</div>
+                
+                <h4>响应示例</h4>
+                <div class="response-example">
+                    <div class="code-block">
+{
+  "totalConversions": 1234,
+  "popularModes": ["smart", "custom", "simple"],
+  "averageTextLength": 500,
+  "mostUsedFeatures": ["url_fetch", "smart_mode"]
+}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">⚙️ 配置参数</div>
+        <p>当使用custom模式时，可以配置以下参数：</p>
+        <table class="parameter-table">
+            <thead>
+                <tr>
+                    <th>参数</th>
+                    <th>类型</th>
+                    <th>默认值</th>
+                    <th>说明</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>lineBreakReplacement</td>
+                    <td>string</td>
+                    <td>" "</td>
+                    <td>换行符替换字符</td>
+                </tr>
+                <tr>
+                    <td>spaceHandling</td>
+                    <td>string</td>
+                    <td>"preserve"</td>
+                    <td>空格处理方式：preserve, normalize, remove</td>
+                </tr>
+                <tr>
+                    <td>trimEdges</td>
+                    <td>boolean</td>
+                    <td>true</td>
+                    <td>是否去除首尾空格</td>
+                </tr>
+                <tr>
+                    <td>maxLineLength</td>
+                    <td>number</td>
+                    <td>0</td>
+                    <td>最大行长（0表示无限制）</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="note">
+            <strong>💡 提示：</strong> 所有API调用都是纯前端实现，无需网络请求，响应速度极快。
+        </div>
+
+        <div class="section-title">🎯 使用示例</div>
+        <div class="code-block">
+// 完整使用示例
+const api = window.apiClient;
+
+// 简单转换
+const result1 = await api.convertText('Hello\nWorld', 'simple');
+console.log(result1.convertedText); // "Hello World"
+
+// 智能转换
+const result2 = await api.convertText('复杂\n多行\n文本', 'smart');
+console.log(result2.convertedText); // "复杂多行文本"
+
+// 自定义转换
+const result3 = await api.convertText('测试\n文本', 'custom', {
+  lineBreakReplacement: ' → ',
+  spaceHandling: 'normalize'
+});
+console.log(result3.convertedText); // "测试 → 文本"
+        </div>
+    </div>
+</body>
+</html>

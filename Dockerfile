@@ -4,7 +4,7 @@ FROM nginx:1.25-alpine
 # 设置维护者信息
 LABEL maintainer="LineWeaver Team"
 LABEL description="文本换行符去除工具"
-    LABEL version="v2.2.2"
+    LABEL version="v2.4.0"
 LABEL unified.smart="true"
 
 # 创建工作目录
@@ -18,6 +18,7 @@ RUN rm -rf /usr/share/nginx/html/*
 
 # 复制项目文件到 nginx 默认目录
 COPY index.html ./
+COPY api-docs.html ./
 COPY README.md ./
 COPY favicon.ico ./
 COPY scripts/ ./scripts/

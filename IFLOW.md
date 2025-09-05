@@ -65,8 +65,8 @@ npx serve .
 ./deploy.sh
 
 # 或手动部署
-docker build -t lineweaver:v2.2.2 .
-docker run -d -p 8080:80 --name lineweaver lineweaver:v2.2.2
+docker build -t lineweaver .
+docker run -d -p 8080:80 --name lineweaver lineweaver
 
 # Docker Compose
 docker-compose up -d
@@ -98,10 +98,10 @@ npm run build    # 静态检查（纯前端项目）
 ### Docker命令
 ```bash
 # 构建镜像
-docker build -t lineweaver:v2.2.2 .
+docker build -t lineweaver .
 
 # 运行容器
-docker run -d -p 8080:80 lineweaver:v2.2.2
+docker run -d -p 8080:80 lineweaver
 
 # 查看日志
 docker logs lineweaver
@@ -220,7 +220,7 @@ ls -la /usr/share/nginx/html/
 
 ## 📈 版本信息
 
-- **当前版本**: v2.2.2
+- **当前版本**: v2.4.0
 - **发布日期**: 2025-09-05
 - **主要更新**: 界面优化、静态设计、统一处理引擎
 - **兼容性**: 现代浏览器全支持
@@ -252,6 +252,6 @@ ls -la /usr/share/nginx/html/
 
 **享受无换行符的纯净文本体验！** 🌊
 
-*最后更新: 2025-09-05 | 版本: v2.2.2*
+*最后更新: 2025-09-05 | 版本: v2.4.0*
 
 </div>
