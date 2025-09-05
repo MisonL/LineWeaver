@@ -47,20 +47,24 @@ function initializeApp() {
     console.log('LineWeaver 已初始化');
 }
 
-/**
- * 初始化模式选择器
- */
-function initializeModeSelector() {
-    const modeRadios = document.querySelectorAll('input[name="processMode"]');
-    const customConfig = document.getElementById('customConfig');
-    
-    modeRadios.forEach(radio => {
-        radio.addEventListener('change', handleModeChange);
-    });
-    
-    // 初始化显示状态
-    handleModeChange();
-}
+    // 初始化事件监听器
+    function initEventListeners() {
+        // 模式选择器
+        const modeRadios = document.querySelectorAll('input[name="processMode"]');
+        modeRadios.forEach(radio => {
+            radio.addEventListener('change', handleModeChange);
+        });
+        
+        // 自定义配置事件监听器
+        const lineBreakSelect = document.getElementById('lineBreakReplacement');
+        if (lineBreakSelect) {
+            lineBreakSelect.addEventListener('change', handleLineBreakChange);
+        }
+        
+        // 初始化显示状态
+        handleModeChange();
+        handleLineBreakChange();
+    }
 
 /**
  * 处理模式变更
@@ -68,23 +72,31 @@ function initializeModeSelector() {
 function handleModeChange() {
     const selectedMode = document.querySelector('input[name="processMode"]:checked')?.value;
     const customConfig = document.getElementById('customConfig');
-    const powershellConfig = document.getElementById('powershellConfig');
     
     if (customConfig) {
         customConfig.style.display = selectedMode === 'custom' ? 'block' : 'none';
     }
     
-    if (powershellConfig) {
-        powershellConfig.style.display = selectedMode === 'powershell' ? 'block' : 'none';
-    }
+    // 更新按钮文本
+    updateButtonText(selectedMode);
+}
+
+/**
+ * 处理换行符替换选择变化
+ */
+function handleLineBreakChange() {
+    const lineBreakSelect = document.getElementById('lineBreakReplacement');
+    const customLineBreak = document.getElementById('customLineBreak');
     
-    // 更新PowerShell复制按钮的显示状态
-    if (Elements.powershellCopyBtn) {
-        Elements.powershellCopyBtn.style.display = selectedMode === 'powershell' ? 'inline-block' : 'none';
+    if (lineBreakSelect && customLineBreak) {
+        const showCustom = lineBreakSelect.value === 'custom';
+        customLineBreak.style.display = showCustom ? 'inline-block' : 'none';
+        
+        // 如果显示自定义输入框，自动聚焦
+        if (showCustom) {
+            customLineBreak.focus();
+        }
     }
-    
-    // 更新转换按钮文本（静态）
-    updateConvertButtonText(selectedMode);
 }
 
     function updateConvertButtonText(mode) {
@@ -537,22 +549,26 @@ function updateTextStats(originalText, processedText) {
  */
 function getProcessingConfig(mode) {
     if (mode === 'custom') {
-        return {
-            paragraphSeparator: document.getElementById('paragraphSeparator')?.value || '[PARA]',
-            listSeparator: document.getElementById('listSeparator')?.value || '[LIST]'
-        };
-    }
-    
-    if (mode === 'powershell') {
-        const preset = document.getElementById('powershellPreset')?.value || 'ai-cli';
-        const validate = document.getElementById('powershellValidate')?.checked || true;
-        const escape = document.getElementById('powershellEscape')?.checked || false;
+        const lineBreakSelect = document.getElementById('lineBreakReplacement');
+        const customLineBreak = document.getElementById('customLineBreak');
+        
+        let lineBreakReplacement = ' ';
+        if (lineBreakSelect?.value === 'custom') {
+            lineBreakReplacement = customLineBreak?.value || ' ';
+        } else if (lineBreakSelect?.value === 'empty') {
+            lineBreakReplacement = '';
+        }
         
         return {
-            mode: 'powershell',
-            preset: preset,
-            validate: validate,
-            escapeSpecial: escape
+            paragraphSeparator: document.getElementById('paragraphSeparator')?.value || '[PARA]',
+            listSeparator: document.getElementById('listSeparator')?.value || '[LIST]',
+            lineBreakReplacement: lineBreakReplacement,
+            spaceHandling: document.getElementById('spaceHandling')?.value || 'preserve',
+            indentationHandling: document.getElementById('indentationHandling')?.value || 'remove',
+            maxLineLength: parseInt(document.getElementById('maxLineLength')?.value || '0') || 0,
+            preserveUrls: document.getElementById('preserveUrls')?.checked || false,
+            preserveCodeBlocks: document.getElementById('preserveCodeBlocks')?.checked || false,
+            trimEdges: document.getElementById('trimEdges')?.checked || true
         };
     }
     

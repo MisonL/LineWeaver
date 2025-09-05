@@ -150,15 +150,115 @@ function customProcessText(text, config = {}) {
     const {
         paragraphSeparator = '[PARA]',
         listSeparator = '[LIST]',
-        detectMarkdown = true
+        lineBreakReplacement = ' ',
+        spaceHandling = 'preserve',
+        indentationHandling = 'remove',
+        maxLineLength = 0,
+        preserveUrls = false,
+        preserveCodeBlocks = false,
+        trimEdges = true
     } = config;
     
-    return smartProcessText(text, {
-        paragraphSeparator,
-        listSeparator,
-        preserveCode: true,
-        detectMarkdown
+    let processed = text;
+    
+    // 1. 处理代码块（如果启用）
+    if (preserveCodeBlocks) {
+        const codeBlockRegex = /```[\s\S]*?```/g;
+        const codeBlocks = [];
+        let match;
+        
+        while ((match = codeBlockRegex.exec(processed)) !== null) {
+            codeBlocks.push({
+                original: match[0],
+                placeholder: `__CODE_BLOCK_${codeBlocks.length}__`
+            });
+        }
+        
+        codeBlocks.forEach((block, index) => {
+            processed = processed.replace(block.original, block.placeholder);
+        });
+    }
+    
+    // 2. 处理URL（如果启用）
+    if (preserveUrls) {
+        const urlRegex = /https?:\/\/[^\s\n]+/g;
+        const urls = [];
+        let match;
+        
+        while ((match = urlRegex.exec(processed)) !== null) {
+            urls.push({
+                original: match[0],
+                placeholder: `__URL_${urls.length}__`
+            });
+        }
+        
+        urls.forEach((url, index) => {
+            processed = processed.replace(url.original, url.placeholder);
+        });
+    }
+    
+    // 3. 处理缩进
+    if (indentationHandling === 'remove') {
+        processed = processed.replace(/^[ \t]+/gm, '');
+    } else if (indentationHandling === 'convert') {
+        processed = processed.replace(/^[ \t]+/gm, (match) => ' '.repeat(match.length));
+    }
+    
+    // 4. 处理换行符
+    processed = processed.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    
+    // 5. 处理段落和列表
+    const paragraphs = processed.split(/\n\s*\n/);
+    const processedParagraphs = paragraphs.map(paragraph => {
+        // 检测列表项
+        const lines = paragraph.split('\n');
+        const processedLines = lines.map(line => {
+            // 检测列表项
+            if (/^\s*[-*+]\s/.test(line) || /^\s*\d+\.\s/.test(line)) {
+                return line.replace(/^\s*[-*+\d+\.]\s*/, '') + listSeparator;
+            }
+            return line.trim();
+        });
+        
+        return processedLines.join(' ');
     });
+    
+    processed = processedParagraphs.join(paragraphSeparator);
+    
+    // 6. 处理空格
+    if (spaceHandling === 'normalize') {
+        processed = processed.replace(/\s+/g, ' ');
+    } else if (spaceHandling === 'remove') {
+        processed = processed.replace(/\s+/g, ' ').trim();
+    }
+    
+    // 7. 处理最大行长
+    if (maxLineLength > 0 && processed.length > maxLineLength) {
+        // 智能截断或提示
+        console.warn(`文本长度超过限制: ${processed.length}/${maxLineLength}`);
+    }
+    
+    // 8. 去除首尾空格
+    if (trimEdges) {
+        processed = processed.trim();
+    }
+    
+    // 9. 恢复代码块和URL
+    if (preserveCodeBlocks) {
+        const codeBlockRegex = /__CODE_BLOCK_(\d+)__/g;
+        processed = processed.replace(codeBlockRegex, (match, index) => {
+            return codeBlocks[parseInt(index)]?.original || match;
+        });
+    }
+    
+    if (preserveUrls) {
+        const urlRegex = /__URL_(\d+)__/g;
+        processed = processed.replace(urlRegex, (match, index) => {
+            return urls[parseInt(index)]?.original || match;
+        });
+    }
+    
+    return processed;
 }
 
 /**
